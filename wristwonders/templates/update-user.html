@@ -1,0 +1,90 @@
+{% extends 'admin-sidebar.html' %}
+{% block content %}
+
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+    .container {
+        max-width: 600px;
+        margin-top: 50px;
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #004085;
+    }
+    .form-check-input {
+        margin-left: 0;
+    }
+</style>
+
+<div class="container">
+    <h1>Update User</h1>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.email.label_tag }}
+            {{ form.email }}
+            {% if form.email.errors %}
+                <div class="text-danger">
+                    {{ form.email.errors }}
+                </div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            {{ form.username.label_tag }}
+            {{ form.username }}
+            {% if form.username.errors %}
+                <div class="text-danger">
+                    {{ form.username.errors }}
+                </div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            {{ form.first_name.label_tag }}
+            {{ form.first_name }}
+            {% if form.first_name.errors %}
+                <div class="text-danger">
+                    {{ form.first_name.errors }}
+                </div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            {{ form.last_name.label_tag }}
+            {{ form.last_name }}
+            {% if form.last_name.errors %}
+                <div class="text-danger">
+                    {{ form.last_name.errors }}
+                </div>
+            {% endif %}
+        </div>
+        <div class="form-check mb-3">
+            {{ form.is_staff }}
+            {{ form.is_staff.label_tag }}
+            {% if form.is_staff.errors %}
+                <div class="text-danger">
+                    {{ form.is_staff.errors }}
+                </div>
+            {% endif %}
+        </div>
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

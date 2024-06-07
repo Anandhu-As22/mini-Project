@@ -1,0 +1,68 @@
+
+{% extends 'nav.html' %}
+{% block type %} 
+
+{% endblock %}
+
+
+
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card my-5 shadow  ">
+            <div class="card-header  " style="background-color:rgb(176,188,194); ">
+                <h3 class="text-center my-3 text-light">Login</h3>
+            </div>
+            <div class="card-body align-items-center ">
+                <form method="post" class="align-items-center my-5">
+                    {% csrf_token %}
+                    <center>
+                      <div class="form-floating">
+                        {{ form.as_p }}
+
+                      </div>
+                
+                    
+                  <button type="submit" class="btn btn-secondary">Login</button></center>
+                
+                </form>
+                    {% if form.errors %}
+                    <div class="alert alert-danger my-3">
+                        <ul>
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                        </ul>
+                    
+                {% endif %}
+                {% if messages %}
+                    <ul class="messages">
+                        {% for message in get_messages %}
+                            <li class="message {{ message.tags }}">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                    </div>
+                               
+                        
+              
+                <div class = "text-center mb-5">
+                    <a href=""class="btn btn-light text-opacity-100 "><img src="../static/img/google.svg" alt="" style="width: 25px;"> login with google</a>
+                </div>
+            </div>
+            <div class="text-center my-3">
+                <a href="{% url 'user-signup' %}" class="">don't have an account?.Create one</a>
+            </div>
+
+        </div>
+        
+    </div>
+</div>
+{% endblock %}
+

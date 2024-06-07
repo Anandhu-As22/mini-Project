@@ -1,0 +1,110 @@
+<!-- templates/user-signup.html -->
+{% extends 'nav.html' %}
+{% load socialaccount %}
+{% block type %}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card my-5 shadow">
+            <div class="card-header" style="background-color:rgb(176,188,194);">
+                <h3 class="text-center my-3 text-light">Signup</h3>
+            </div>
+            <div class="card-body align-items-center">
+                <form method="post" class="align-items-center my-3">
+                    {% csrf_token %}
+                    <center>
+                    <div class="form-floating">
+                        {{ form.email.label_tag }}
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="text-danger">
+                                {{ form.email.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="form-floating mt-2">
+                        {{ form.username.label_tag }}
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                            <div class="text-danger">
+                                {{ form.username.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="form-floating mt-2">
+                        {{ form.first_name.label_tag }}
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}
+                            <div class="text-danger">
+                                {{ form.first_name.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="form-floating mt-2">
+                        {{ form.last_name.label_tag }}
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}
+                            <div class="text-danger">
+                                {{ form.last_name.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="form-floating mt-2">
+                        {{ form.password1.label_tag }}
+                        {{ form.password1 }}
+                        {% if form.password1.errors %}
+                            <div class="text-danger">
+                                {{ form.password1.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="form-floating mt-2">
+                        {{ form.password2.label_tag }}
+                        {{ form.password2 }}
+                        {% if form.password2.errors %}
+                            <div class="text-danger">
+                                {{ form.password2.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    </center>
+                    <center>
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-secondary">Signup</button>
+                        </div>
+                        
+                    </center>
+                </form>
+                {% if form.errors %}
+                    <div class="alert alert-danger my-3">
+                        <ul>
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                
+                
+                <div class = "text-center ">
+                    <a href="{% provider_login_url 'google' %}?next=/"class="btn btn-light text-opacity-100 "><img src="../static/img/google.svg" alt="" style="width: 25px;"> sign with google</a>
+                    
+                </div>
+                <div class="text-center my-3">
+                    <a href="{% url 'user-login' %}" class="">already have an account?</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
