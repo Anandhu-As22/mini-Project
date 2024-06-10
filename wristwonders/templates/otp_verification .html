@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account Verification</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evSXe9pCU5Lp5ENZrH8sVk3I7KzBZZtse4E9yUJvERswDA5z9Cd2H5F1n5sE1CE" crossorigin="anonymous">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+    }
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    .verification-card {
+      width: 100%;
+      max-width: 380px;
+      padding: 2rem;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .verification-card h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: #333;
+    }
+    .verification-card .form-control {
+      height: 45px;
+      font-size: 1rem;
+    }
+    .verification-card .btn-primary {
+      width: 100%;
+      font-size: 1.1rem;
+      padding: 0.75rem;
+      margin-top: 1rem;
+    }
+    .verification-card .btn-link {
+      display: block;
+      width: 100%;
+      text-align: center;
+      margin-top: 0.75rem;
+      text-decoration: none;
+      font-size: 0.95rem;
+      color: #007bff;
+    }
+    .verification-card .btn-link:hover {
+      text-decoration: underline;
+    }
+    .message {
+      color: red;
+      margin-top: 1rem;
+      text-align: center;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="verification-card">
+      <h1>Verify Your Account</h1>
+      <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="otp" class="form-label">Enter OTP:</label>
+          <input type="text" class="form-control" id="otp" name="otp" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Verify</button>
+        <a href="{% url 'resend-otp' %}" class="btn btn-link">Resend OTP</a>
+        {% if messages %}
+          <div class="message">
+            <ul>
+              {% for message in messages %}
+                <li>{{ message }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6G8NycE6Cw95uUd4zF1s8on/l0TKEb+19h3LDAuxz0rZkX0W8a3" crossorigin="anonymous"></script>
+</body>
+</html>
