@@ -1,0 +1,246 @@
+{% extends 'nav.html' %}
+{% block type %}
+{% endblock %}
+{% block content %}
+
+<style>
+    body {
+        background-color: #f8f9fa;
+        font-family: Arial, sans-serif;
+    }
+    .profile-header {
+        text-align: center;
+        padding: 3rem;
+        background: linear-gradient(to right, #B0BCC2, #B0BCC2);
+        color: white;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    /* .profile-img {
+        width: 140px;
+        height: 140px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 5px solid #fff;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    } */
+    .profile-info h1 {
+        font-size: 2rem;
+        margin-top: 1rem;
+    }
+    .profile-info p {
+        margin: 0;
+        color: #f1f1f1;
+    }
+    .nav-pills .nav-link {
+        border-radius: 0.75rem;
+        margin-right: 0.5rem;
+    }
+    .nav-pills .nav-link.active {
+        background-color: #007bff;
+        color: white;
+    }
+    .card {
+        border: none;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .order-table th, .order-table td {
+        vertical-align: middle;
+    }
+    .wishlist-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    .wishlist-item img {
+        width: 70px;
+        height: 70px;
+        object-fit: cover;
+        margin-right: 1rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .wishlist-item .btn {
+        margin-left: auto;
+    }
+    .settings-form .form-group {
+        margin-bottom: 1.5rem;
+    }
+    .settings-form label {
+        font-weight: bold;
+    }
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+</style>
+</head>
+<body>
+<div class="container mt-5">
+    <div class="profile-header">
+        
+        <div class="profile-info">
+            <h1>{{ user.username }}</h1>
+            <p>{{ user.email }}</p>
+            <p class="text-muted">{{ user.date_joined }}</p>
+        </div>
+    </div>
+
+    <div class="card mb-5">
+        <div class="card-body">
+            <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="pills-orders-tab" data-bs-toggle="pill" data-bs-target="#pills-orders" type="button" role="tab" aria-controls="pills-orders" aria-selected="true">Orders</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="pills-wishlist-tab" data-bs-toggle="pill" data-bs-target="#pills-wishlist" type="button" role="tab" aria-controls="pills-wishlist" aria-selected="false">Wishlist</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="pills-settings-tab" data-bs-toggle="pill" data-bs-target="#pills-settings" type="button" role="tab" aria-controls="pills-settings" aria-selected="false">Settings</button>
+                </li>
+            </ul>
+            <div class="tab-content" id="pills-tabContent">
+                <div class="tab-pane fade show active" id="pills-orders" role="tabpanel" aria-labelledby="pills-orders-tab">
+                    <div class="p-3">
+                        <h4>Order History</h4>
+                        
+                        <table class="table table-hover order-table">
+                            
+                            <thead>
+                                <tr>
+                                    <th>Order id</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>payment status</th>
+                                    <th>Total</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in orders %}
+                                <tr>
+                                    <td>{{ order.id }}</td>
+                                    <td>{{ order.created_at }}</td>
+                                    
+                                    <td>
+                                        {% if order.is_return %}
+                                            {% if order.return_status == 'Return requested' %}
+                                                <p style="color:black">{{ order.return_status }}</p>
+                                            {% elif order.return_status == 'Returned' %}
+                                                <p style="color:green">{{ order.return_status }}</p>
+                                            {% else %}
+                                                <p style="color:red">{{ order.return_status }}</p>
+                                            {% endif %}
+                                        {% elif order.is_cancelled %}
+                                            <p>cancelled</p>
+                                        {% else %}
+                                        <span class="badge bg-success">{{ order.status }}</span>
+                                        {% endif %}
+                                        
+                                    </td>
+                                    <td>{{ order.payment_status }}</td>
+                                    <td>{{ order.total_price }}</td>
+                                    <td><a href=""><button class="btn btn-outline-primary btn-sm">Details</button></a>
+                                        {% if order.is_cancelled %}
+                                        {% elif order.is_return %}
+                                        
+                                        {% else %}
+                                            {% if order.status != 'Delivered' %}
+                                            <a href="{% url 'ordercancel' order.id %}"><button class="btn btn-outline-danger btn-sm">Cancel</button></a>
+                                            {% else %}
+                                            <a href="{% url 'returnrequest' order.id %}"><button class="btn btn-outline-info btn-sm">return</button></a>
+                                            {% endif %}
+                                        
+                                        {% endif %}
+                                    
+
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                
+                                <!-- Additional orders can be added here -->
+                            </tbody>
+                        </table>
+                        
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="pills-wishlist" role="tabpanel" aria-labelledby="pills-wishlist-tab">
+                    <div class="p-3">
+                        <h4>Wishlist</h4>
+                        <div class="wishlist-item">
+                            <img src="https://via.placeholder.com/70" alt="Product Image">
+                            <div>
+                                <h5>Product 1</h5>
+                                <p>$59.99</p>
+                            </div>
+                            <button class="btn btn-outline-primary btn-sm">Add to Cart</button>
+                        </div>
+                        <div class="wishlist-item">
+                            <img src="https://via.placeholder.com/70" alt="Product Image">
+                            <div>
+                                <h5>Product 2</h5>
+                                <p>$79.99</p>
+                            </div>
+                            <button class="btn btn-outline-primary btn-sm">Add to Cart</button>
+                        </div>
+                        <!-- Additional wishlist items can be added here -->
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="pills-settings" role="tabpanel" aria-labelledby="pills-settings-tab">
+                    <div class="p-3">
+                        <h4>Account Details</h4>
+                        <ul class="details-list">
+                            <li>
+                                <span class="icon"><i class="bi bi-envelope-fill"></i></span>
+                                <span class="detail-label">userame:</span> {{ user.username }}
+                            </li>
+                            <li>
+                                <span class="icon"><i class="bi bi-envelope-fill"></i></span>
+                                <span class="detail-label">Email:</span>  {{ user.email }}
+                            </li>
+                            <li>
+                                <span class="icon"><i class="bi bi-lock-fill"></i></span>
+                                <span class="detail-label">First Name:</span> {{ user.first_name }}
+                            </li>
+                            <li>
+                                <span class="icon"><i class="bi bi-envelope-fill"></i></span>
+                                <span class="detail-label">Last Name:</span> {{ user.last_name }}
+                            </li>
+                            
+                            <!-- Additional details can be added here -->
+                        </ul>
+                        <ul class="details-list mt-5">
+                            <h5>Shipping Address</h5>
+                            {% for address in address %}
+                            <li>
+                                <span class="icon"><i class="bi bi-envelope-fill mt-4"></i></span>
+                                <span class="detail-label mt-4"><strong>Address :</strong> {{ address.house_name }},{{ address.street }},{{ address.city }},{{ address.district }},{{ address.state }},{{ address.pincode }}
+                                </span>   
+                                    <a href="{% url 'edit-address' address.pk %}"><button class="btn btn-info btn-sm ">Edit </button></a>
+                                    <a href="{% url 'delete-address' address.pk %}"><button class="btn btn-danger btn-sm ">delete </button></a>   
+                                
+                            </li>
+                            {% endfor %}
+
+                        </ul>
+                        <a href="{% url 'add-address' %}?next={{ request.path }}"><button class="btn btn-info mt-4">Add Address</button></a>
+
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+
+
+
+
+
+
+
+{% endblock %}

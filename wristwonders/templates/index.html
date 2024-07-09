@@ -47,7 +47,7 @@
         <div class="container-fluid">
             <div class="inner-header">
                 <div class="logo">
-                    <a href="./index.html"><img src="{% static 'img/logo.png' %}" alt="" style="width: 150px;"></a>
+                    <a href="{% url 'home' %}"><img src="{% static 'img/logo.png' %}" alt="" style="width: 150px;"></a>
                 </div>
                 <div class="header-right">
                     <img src="{% static 'img/icons/search.png' %}" alt="" class="search-trigger">
@@ -242,7 +242,10 @@
                 <div class="col-lg-3 col-sm-6 mix all dresses bags">
                     <div class="single-product-item">
                         <figure>
-                            <a href="{% url 'product-detail' product.pk %}"><img src="{{ product.image.url }}" alt=""></a>
+                            <a href="{% url 'product-detail' product.pk %}">
+                                <img src="{{ product.images.all.first.image.url }}" alt="">
+
+                            </a>
                             <div class="p-status">new</div>
                         </figure>
                         <div class="product-text">

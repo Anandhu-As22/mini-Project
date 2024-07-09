@@ -8,6 +8,9 @@ urlpatterns =[
     path('adminn/update-user/<pk>',views.Update_user,name='update-user'),
     path('adminn/unblock-user/<pk>',views.Un_block_user,name='unblock-user'),
     path('adminn/block-user/<pk>',views.block_user,name='block-user'),
+    path('adminn/orders/',views.orders_list,name='adminnorders'),
+    path('adminn/orderdetails/<pk>',views.order_detail,name='adminnorderdetail'),
+    
 
 
 

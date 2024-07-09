@@ -1,0 +1,45 @@
+{% extends 'admin-sidebar.html' %}
+{% block content %}
+
+
+<div class="container mt-4" style="max-width: 600px;">
+    <h1 class="mb-4 text-center" style="font-family: 'Arial', sans-serif;
+    color: #333;">Add New Product</h1>
+    <div class="card shadow-sm p-4"style="border-radius:10px">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                {{ productform.as_p }}
+            </div>
+
+            <input type="file" id="files" name="images" multiple>
+            
+            
+            <button type="submit" class="btn btn-primary btn-block">Update Product</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+</script>
+{% endblock %}
+
+

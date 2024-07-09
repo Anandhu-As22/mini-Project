@@ -1,6 +1,7 @@
 from django.shortcuts import render,redirect
 from django.contrib.auth import login,logout,authenticate,get_user_model
 from .forms import LoginForm,RegisterForm
+from django.views.decorators.cache import never_cache
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
@@ -208,11 +209,11 @@ def resend_otp(request):
 
 # user logout
 
-
+@never_cache
 def user_logout(request):
     
     logout(request)
-    del request.session['user']
+    
     return redirect('index')
 
 
@@ -246,11 +247,10 @@ def admin_login(request):
         form =LoginForm()
     return render(request,'admin_login.html',{'form':form})
   
-
+@never_cache
 def adminn_logout(request):
     
     logout(request)
-    del request.session['adminn']
     return redirect(admin_login)
 
 

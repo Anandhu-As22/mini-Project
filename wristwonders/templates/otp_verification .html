@@ -14,82 +14,94 @@
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+      background: #f8f9fa;
     }
     .container {
       display: flex;
       justify-content: center;
       align-items: center;
       flex-direction: column;
-    }
-    .verification-card {
       width: 100%;
-      max-width: 380px;
+      max-width: 400px;
       padding: 2rem;
-      border-radius: 8px;
-      background: #fff;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      background: #ffffff;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
     }
-    .verification-card h1 {
+    .container:hover {
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+    .container h1 {
       text-align: center;
       margin-bottom: 1.5rem;
-      font-size: 1.75rem;
-      font-weight: 600;
+      font-size: 2rem;
+      font-weight: 700;
       color: #333;
     }
-    .verification-card .form-control {
+    .container .form-control {
       height: 45px;
       font-size: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      border: 2px solid #007bff;
+      padding-left: 15px;
     }
-    .verification-card .btn-primary {
+    .container .btn-primary {
       width: 100%;
       font-size: 1.1rem;
       padding: 0.75rem;
-      margin-top: 1rem;
+      border-radius: 8px;
+      background: #007bff;
+      border: none;
+      transition: background 0.3s ease;
     }
-    .verification-card .btn-link {
+    .container .btn-primary:hover {
+      background: #0056b3;
+    }
+    .container .btn-link {
       display: block;
       width: 100%;
       text-align: center;
-      margin-top: 0.75rem;
+      margin-top: 1rem;
       text-decoration: none;
-      font-size: 0.95rem;
+      font-size: 1rem;
       color: #007bff;
+      transition: color 0.3s ease;
     }
-    .verification-card .btn-link:hover {
+    .container .btn-link:hover {
+      color: #0056b3;
       text-decoration: underline;
     }
     .message {
-      color: red;
+      color: #dc3545;
       margin-top: 1rem;
       text-align: center;
-      font-size: 0.95rem;
+      font-size: 1rem;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="verification-card">
-      <h1>Verify Your Account</h1>
-      <form method="POST">
-        {% csrf_token %}
-        <div class="mb-3">
-          <label for="otp" class="form-label">Enter OTP:</label>
-          <input type="text" class="form-control" id="otp" name="otp" required>
+    <h1>Verify Your Account</h1>
+    <form method="POST">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="otp" class="form-label">Enter OTP:</label>
+        <input type="text" class="form-control" id="otp" name="otp" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Verify</button>
+      <a href="{% url 'resend-otp' %}" class="btn btn-link">Resend OTP</a>
+      {% if messages %}
+        <div class="message">
+          <ul>
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+          </ul>
         </div>
-        <button type="submit" class="btn btn-primary">Verify</button>
-        <a href="{% url 'resend-otp' %}" class="btn btn-link">Resend OTP</a>
-        {% if messages %}
-          <div class="message">
-            <ul>
-              {% for message in messages %}
-                <li>{{ message }}</li>
-              {% endfor %}
-            </ul>
-          </div>
-        {% endif %}
-      </form>
-    </div>
+      {% endif %}
+    </form>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6G8NycE6Cw95uUd4zF1s8on/l0TKEb+19h3LDAuxz0rZkX0W8a3" crossorigin="anonymous"></script>

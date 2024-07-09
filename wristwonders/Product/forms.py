@@ -1,5 +1,5 @@
 from django.db import models
-from django.forms import fields,ModelForm
+from django.forms import fields,ModelForm,inlineformset_factory
 from .models import Category,Product,product_image
 from django import forms
 
@@ -59,10 +59,10 @@ class Product_Form(ModelForm):
             'stock': forms.NumberInput(attrs={'class': 'form-control'}),
         }
 
-class Product_Image_Form(ModelForm):
-    class Meta:
-        model = product_image
-        fields = ['image']
-        widgets = {
-            'image': forms.ClearableFileInput(attrs={'class': 'form-control-file'}),
-        }
+# class Product_Image_Form(forms.ModelForm):
+#     class Meta:
+        
+#         model = product_image
+#         fields = ['image']
+
+ProductImageFormSet = inlineformset_factory(Product, product_image, form=forms.ModelForm, fields=['image'], extra=3)

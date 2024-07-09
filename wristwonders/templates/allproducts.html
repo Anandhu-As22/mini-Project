@@ -1,0 +1,33 @@
+{% extends 'nav.html' %}
+
+{% block type %}
+{% endblock %}
+
+{% block content %}
+<section class="latest-products spad">
+    <div class="container">
+        <div class="row" id="product-list">
+            {% for product in products %}
+            <div class="col-lg-3 col-sm-6 mix all dresses bags">
+                <div class="single-product-item">
+                    <figure>
+                        <a href="{% url 'product-detail' product.pk %}">
+                        
+                            <img src="{{ product.images.all.first.image.url }}" alt="">
+
+                            
+                        </a>
+                        <div class="p-status">new</div>
+                    </figure>
+                    <div class="product-text">
+                        <h6>{{ product.Product_name }}</h6>
+                        <p>{{ product.price }}</p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+    </div>
+</section>
+
+{% endblock %}

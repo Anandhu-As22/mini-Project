@@ -23,13 +23,22 @@
                 <td>{{ product.id }}</td>
                 <td>{{ product.Product_name }}</td>
                 <td>{{ product.description }}</td>
-                <td><img src="{{ product.image.url }}" alt="{{ product.Product_name }}" class="img-thumbnail" style="max-width: 100px;"></td>
+                <td>
+                    {% for image in product.images.all %}
+                    <img src="{{ image.image.url }}" alt="{{ product.Product_name }}" class="img-thumbnail" style="max-width: 100px;">
+                    {% endfor %}
+                </td>
                 <td>{{ product.category }}</td>
                 <td>${{ product.price }}</td>
                 <td>{{ product.stock }}</td>
                 <td>
-                    <a href="" class="btn btn-outline-info btn-sm">Edit</a>
-                    <a href="" class="btn btn-outline-danger btn-sm">Delete</a>
+                    <a href="{% url 'update-product' product.id %}" class="btn btn-outline-info btn-sm">Edit</a>
+                    {% if product.soft_delete == True %}
+                        <a href="{% url 'softdelete-product' product.id %}" class="btn btn-outline-success btn-sm"> Soft delete</a>
+                    {% else %}
+                        <a href="{% url 'softdelete-product' product.id %}" class="btn btn-outline-dark btn-sm"> Soft delete</a>
+                    {% endif %}
+                    <a href="{% url 'delete-product' product.pk %}" class="btn btn-outline-danger btn-sm">Delete</a>
                 </td>
             </tr>
             {% endfor %}

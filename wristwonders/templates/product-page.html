@@ -30,27 +30,45 @@
     <section class="product-page">
         <div class="container">
             <div class="product-control">
-                <a href="#">Previous</a>
-                <a href="#">Next</a>
+                <!-- <a href="#">Previous</a>
+                <a href="#">Next</a> -->
             </div>
             <div class="row">
                 <div class="col-lg-6">
                     <div class="product-slider owl-carousel">
                         <div class="product-img">
                             <figure>
-                                <img src="{{ product.image.url }}" alt="">
+                                {% with product.images.all|slice:":1" as first_images %}
+                                    {% for image in first_images %}
+                                        <img src="{{ image.image.url }}" alt="">
+                                    {% endfor %}
+                                {% endwith %}
                                 <div class="p-status">new</div>
                             </figure>
                         </div>
                         <div class="product-img">
                             <figure>
-                                <img src="{{ product.image.url }}" alt="">
+                                {% with product.images.all|slice:"1:2" as second_images %}
+                                    {% for image in second_images %}
+                                        <img src="{{ image.image.url }}" alt="">
+                                    {% endfor %}
+                                {% endwith %}
+                                <div class="p-status">new</div>
+                            </figure>
+                        </div>
+                        <div class="product-img">
+                            <figure>
+                                {% with product.images.all.2 as third_image %}
+                                    {% if third_image %}
+                                        <img src="{{ third_image.image.url }}" alt="">
+                                    {% endif %}
+                                {% endwith %}
                                 <div class="p-status">new</div>
                             </figure>
                         </div>
                     </div>
-                    
                 </div>
+                
                 <div class="col-lg-6">
                     <div class="product-content">
                         <h2>{{ product.Product_name }}</h2>
@@ -64,17 +82,24 @@
                                 <i class="fa fa-star"></i>
                             </div>
                         </div>
-                        <p>{{ product.description }}</p>
+                        <a href="{% url 'add-cart' product.pk %}" class="primary-btn pc-btn">Add to cart</a>
+                        <br>
+                        <br>
+                        
+                        
                         <ul class="tags">
+                            <li><span>stock :</span>{{ product.stock }}</li> 
                             <li><span>Category :</span> {{ product.category.category_name }}</li>
                             
                         </ul>
-                        <div class="product-quantity">
+                        <p><strong>Product description</strong></p>
+                        <p>{{ product.description }}</p>
+                        <!-- <div class="product-quantity">
                             <div class="pro-qty">
                                 <input type="text" value="1">
                             </div>
-                        </div>
-                        <a href="#" class="primary-btn pc-btn">Add to cart</a>
+                        </div> -->
+                        
                         <ul class="p-info">
                             <li>Product Information</li>
                             <li>Reviews</li>
@@ -98,19 +123,27 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-lg-3 col-sm-6">
-                    <div class="single-product-item">
-                        <figure>
-                            <a href="#"><img src="" alt=""></a>
-                            <div class="p-status">new</div>
-                        </figure>
-                        <div class="product-text">
-                            <h6>Green Dress with details</h6>
-                            <p>$22.90</p>
+            {% for products in related_products %}
+                
+                    <div class="col-lg-3 col-sm-4">
+                        <div class="single-product-item">
+                            <figure>
+                                <a href="{% url 'product-detail' products.pk %}">
+                                    
+                                    <img src="{{ products.images.all.first.image.url }}" alt="">
+                                </a>
+                                <div class="p-status">new</div>
+                            </figure>
+                            <div class="product-text">
+                                <h6>
+                                    {{ products.Product_name }}</h6>
+                                <p>{{ products.price }}</p>
+                            </div>
                         </div>
                     </div>
-                </div>
+                    
                 
+            {% endfor %}
             </div>
         </div>
     </section>
