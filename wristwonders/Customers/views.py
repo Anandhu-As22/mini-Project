@@ -77,18 +77,32 @@ def add_to_cart(request, pk):
     return redirect(user_login)
 
 def remove_cart(request, pk):
-    if 'user' in request.session:
+   
+    # print('remove cart')
+    if request.method == 'POST' and 'user' in request.session:
+        # print('in the remove cart')
         try:
+            # print('try')
             username = request.session['user']
+            # print(username)
             user = get_object_or_404(User, username=username)
-            product = get_object_or_404(Product, pk=pk)
+            # print(user)
+            # product = get_object_or_404(Product, pk=pk)
+            # print(product)
             cart = Cart.objects.get(customer=user)
-            cart_item = Cart_items.objects.get(cart=cart, product=product)
+            cart_item = Cart_items.objects.get(cart=cart, pk = pk)
+            
+            
+            
+            # print(cart)
+            # print(cart_item)
+            
 
             cart_item.delete()
             return JsonResponse({'success': True})
-        except Cart.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'Cart does not exist'})
+        except (Cart.DoesNotExist, Cart_items.DoesNotExist, Product.DoesNotExist):
+            print('e')
+            return JsonResponse({'success': False, 'error': 'Item or cart does not exist'})
     return JsonResponse({'success': False, 'error': 'User not logged in'})
 
 def update_cart(request, pk):
@@ -102,7 +116,7 @@ def update_cart(request, pk):
             cart_item.quantity = quantity
             cart_item.save()
 
-        if request.is_ajax():
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
             total_price = sum(item.get_total() for item in Cart_items.objects.filter(cart=cart_item.cart))
             return JsonResponse({'message': 'Item updated', 'cart_total': total_price, 'item_quantity': quantity})
     return JsonResponse({'message': 'Invalid request'})
@@ -235,11 +249,47 @@ def Checkout(request):
 
 
 def all_products(request):
-    products = Product.objects.all()
 
-    return render(request,'allproducts.html',{'products':products})
+    active_category = Category.objects.filter(soft_delete = False)
+    products = Product.objects.filter(category__in = active_category,soft_delete = False)
+    sort_by = request.GET.get('sort','name')
+    filter_by = request.GET.get('filter')
+    # print(products)
+    print(filter_by)
+    print('sort')
+#  filter 
+    if filter_by:
+        print('f')
+        products = products.filter(category__category_name = filter_by)
+    #  sorting
+    if sort_by== 'aA-zZ':
+        print('n')
+        products = products.order_by('Product_name')
+    elif sort_by == 'zZ-aA':
+        print('-n')
+        products =products.order_by('-Product_name')
 
-# def allcategories(request):
-#     categories = Category.objects.all()
-#     return render(request,'nav.html',{'categories':categories})
-# 
+    elif sort_by == 'high-low':
+        products = products.order_by('-price')
+    elif sort_by == 'low-high':
+        products=products.order_by('price')
+    
+    else:
+       products = products
+    
+
+    return render(request,'allproducts.html',{'products':products,'category':active_category})
+
+
+
+def user_order_details(request,pk):
+    if 'user' in request.session:
+        username = request.session['user']
+        user = get_object_or_404(User,username=username)
+        user_id = user.id
+        order = get_object_or_404(Order,id=pk)
+        order_items = Order_item.objects.filter(order_id = order.id)
+        total_order_price = sum(item.price for item in order_items)
+        return render(request,'userorderdetails.html',{'order':order,'order_items':order_items,'total_order_price':total_order_price,'user':user})
+    return redirect(user_login)
+

@@ -2,13 +2,14 @@ from django.shortcuts import render,redirect,get_object_or_404
 from authentication.views import admin_login
 from Customers.models import User
 from authentication.forms import RegisterForm
-from .forms import UpdateForm
+from .forms import UpdateForm,AddCouponForm,EditCouponForm
 from orders.models import Order,Order_item
 from django.http import JsonResponse
-
+from .models import Coupon
 from django.views.decorators.csrf import csrf_exempt
 
 from django.views.decorators.http import require_POST
+from decimal import Decimal
 
 # Create your views here.
 
@@ -115,7 +116,7 @@ def orders_list(request):
 
 def order_detail(request,pk):
     if 'adminn' in request.session:
-        order = Order.objects.get(id = pk)
+        order = get_object_or_404(Order,id=pk)
         order_items = Order_item.objects.filter(order_id = order.id)
         total_order_price = sum(item.price for item in order_items)
         return render(request,'adminnorderdetail.html',{'order':order,'order_items':order_items,'total_order_price':total_order_price})
@@ -143,3 +144,145 @@ def order_detail(request,pk):
 
 #     except Exception as e:
 #         return JsonResponse({'success': False, 'error': str(e)})
+
+
+
+def coupon_list(request):
+    if 'adminn' in request.session:
+        coupons = Coupon.objects.all()
+        return render(request,'coupon.html',{'coupons':coupons})
+    return redirect(admin_login)
+
+
+def addcoupon(request):
+    if 'adminn' in request.session:
+        if request.method == "POST":
+            addcoupon_form = AddCouponForm(request.POST)
+            if addcoupon_form.is_valid():
+                couponcode=addcoupon_form.cleaned_data['coupon_code']
+                discount=addcoupon_form.cleaned_data['discount']
+                min_purchase_amount=addcoupon_form.cleaned_data['min_purchase_amount']
+
+                if len(couponcode)<6:               
+                    addcoupon_form.add_error('coupon_code','it should be length more than 6')
+                
+                if discount < 1.00:
+                    addcoupon_form.add_error('discount','discount should be greater than 0')
+                
+                if min_purchase_amount < 10.00:
+                    addcoupon_form.add_error('min_purchase_amount','amount should be greater than 10')
+                
+                if discount >= min_purchase_amount:
+                    addcoupon_form.add_error('discount','discount amount should be lesser than min purchase amount')
+                    
+                if Coupon.objects.filter(coupon_code=couponcode).exists():
+                    print("coupon exists")
+                    addcoupon_form.add_error('coupon_code','this coupon code already exists')
+                    
+                if addcoupon_form.errors:
+                    return render(request,'addcoupon.html',{'form':addcoupon_form})
+                
+                else:
+                    
+                    addcoupon_form.save()
+                    return redirect(coupon_list)
+            else:
+                
+                return render(request, 'addcoupon.html', {'form': addcoupon_form})
+        form=AddCouponForm()
+        return render(request,'addcoupon.html',{'form':form})
+    return redirect(admin_login)
+
+
+def edit_coupon(request,pk):
+    if 'adminn' in request.session:
+        coupon = get_object_or_404(Coupon, id=pk) 
+        if request.method =="POST":
+            print('inside coiupon post')
+            print('Request POST data:', request.POST)
+            editcoupon_form = EditCouponForm(request.POST,instance=coupon)
+            
+            if editcoupon_form.is_valid():
+                print('form valid')
+                couponcode=editcoupon_form.cleaned_data['coupon_code']
+                discount=editcoupon_form.cleaned_data['discount']
+                min_purchase_amount=editcoupon_form.cleaned_data['min_purchase_amount']
+
+                if len(couponcode)<6:               
+                    editcoupon_form.add_error('coupon_code','it should be length more than 6')
+                
+                if discount < 1.00:
+                    editcoupon_form.add_error('discount','discount should be greater than 0')
+                
+                if min_purchase_amount < 10.00:
+                    editcoupon_form.add_error('min_purchase_amount','amount should be greater than 10')
+                
+                if discount >= min_purchase_amount:
+                    editcoupon_form.add_error('discount','discount amount should be lesser than min purchase amount')
+                    
+                
+                    
+                if editcoupon_form.errors:
+                    return render(request,'editcoupon.html',{'form':editcoupon_form})
+                
+                else:
+                    print('coupon save')
+                    editcoupon_form.save()
+                    return redirect(coupon_list)
+            
+            else:
+                print('Form is invalid')
+                print('Form errors:', editcoupon_form.errors)
+                return render(request, 'editcoupon.html', {'form': editcoupon_form})
+        form = EditCouponForm(instance=coupon)
+        return render(request,'editcoupon.html',{'form':form})
+    return redirect(admin_login)
+
+
+def deletecoupon(request,pk):
+    if 'adminn' in request.session:
+        coupon = get_object_or_404(Coupon,id=pk)
+        coupon.delete()
+        return redirect(coupon_list)
+    return redirect(admin_login)
+
+
+@csrf_exempt
+def apply_coupon(request):
+    if request.method == "POST" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        try:
+            coupon_code = request.POST.get('coupon')
+            total_price = request.POST.get('totalprice') # Convert to Decimal for precise calculations
+            if total_price is None:
+                return JsonResponse({
+                    'status':'error',
+                    'message':'error:total_price is null'
+
+                })
+
+            try:
+                total_price = Decimal(total_price)
+                coupon = Coupon.objects.get(coupon_code=coupon_code, is_active=True)
+                if total_price >= coupon.min_purchase_amount:
+                    new_total_price = total_price - coupon.discount
+                    return JsonResponse({
+                        'status': 'success',
+                        
+                        'new_total_price': float(new_total_price)  
+                    })
+                else:
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': "Error: Minimum purchase amount for the coupon is not met"
+                    })
+            except Coupon.DoesNotExist:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': "Error: Invalid coupon code"
+                })
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Invalid request'
+    })

@@ -2,6 +2,7 @@ from django import forms
 from Customers.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.forms import ModelForm
+from .models import Coupon
 
 
 class UpdateForm(ModelForm):
@@ -14,4 +15,19 @@ class UpdateForm(ModelForm):
     class Meta:
         model = User
         fields = ['email', 'username', 'first_name', 'last_name', 'is_staff']
+
+
+
+class AddCouponForm(ModelForm):
+    class Meta:
+        model=Coupon
+        fields=['coupon_code','coupon_name','discount','min_purchase_amount','is_active']
+
+class EditCouponForm(ModelForm):
+    class Meta:
+        model =Coupon
+        fields='__all__'  
+        exclude = ['created_at'] 
+
+
 

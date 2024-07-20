@@ -1,0 +1,71 @@
+{% extends 'admin-sidebar.html' %}
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coupon List</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 50px;
+        }
+        .coupon-table {
+            margin: 0 auto;
+            width: 80%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Coupons</h1>
+        <div >
+            <a href="{% url 'addcoupon' %}" class="btn btn-dark">add coupon</a>
+        </div>
+        <table class="table table-striped table-hover coupon-table">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Coupon Code</th>
+                    <th scope="col">Coupon Name</th>
+                    <th scope="col">Discount</th>
+                    <th scope="col">Min Purchase amount</th>
+                    <th scope="col">Is Active</th>
+                    <th scope="col">Created At</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for coupon in coupons %}
+                <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td>{{ coupon.coupon_code }}</td>
+                    <td>{{ coupon.coupon_name }}</td>
+                    <td>{{ coupon.discount }}</td>
+                    <td>{{ coupon.min_purchase_amount }}</td>
+                    <td>{{ coupon.is_active|yesno:"Yes,No" }}</td>
+                    <td>{{ coupon.created_at|date:"Y-m-d H:i" }}</td>
+                    <td>
+                        <a href="{% url 'editcoupon' coupon.pk %}" class="btn btn-outline-info btn-sm">Edit</a>
+                        <a href="{% url 'deletecoupon' coupon.pk %}" class="btn btn-outline-danger btn-sm">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
+
+
+
+
+{% endblock %}

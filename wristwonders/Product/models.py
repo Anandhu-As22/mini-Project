@@ -36,3 +36,4 @@ class product_image(models.Model):
     def __str__(self) -> str:
         return f"{self.product.Product_name} Image"
  
+

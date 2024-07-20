@@ -142,7 +142,7 @@
                                     </td>
                                     <td>{{ order.payment_status }}</td>
                                     <td>{{ order.total_price }}</td>
-                                    <td><a href=""><button class="btn btn-outline-primary btn-sm">Details</button></a>
+                                    <td><a href="{% url 'userorderdetails' order.id %}"><button class="btn btn-outline-primary btn-sm">Details</button></a>
                                         {% if order.is_cancelled %}
                                         {% elif order.is_return %}
                                         

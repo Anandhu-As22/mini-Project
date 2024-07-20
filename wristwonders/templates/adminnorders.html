@@ -84,7 +84,7 @@
                             <td>{{ order.payment_status }}</td>
                             <td>${{ order.total_price }}</td>
                             <td>
-                                <a href="{% url 'adminnorderdetail' orderitem.id %}" class="btn btn-primary btn-sm">View Details</a>
+                                <a href="{% url 'adminnorderdetail' order.id %}" class="btn btn-primary btn-sm">View Details</a>
                             </td>
                         </tr>
                     {% endfor %}

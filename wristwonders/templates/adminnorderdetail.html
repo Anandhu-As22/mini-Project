@@ -1,4 +1,5 @@
 {% extends 'admin-sidebar.html' %}
+{% load custom_filters %}
 
 {% block content %}
 
@@ -40,7 +41,7 @@
             </tr>
             <tr>
                 <th>Total Price:</th>
-                <td>${{ total_order_price }}</td>
+                <td>${{ order.total_price }}</td>
             </tr>
             <tr>
                 <th>Created At:</th>
@@ -90,7 +91,9 @@
                 <tr>
                     <th>Product</th>
                     <th>Quantity</th>
-                    <th>Price</th>
+                    <th>Price of 1 product</th>
+                    <th>price</th>
+                    
                 </tr>
             </thead>
             <tbody>
@@ -99,10 +102,15 @@
                         <td>{{ item.Product.Product_name }}</td>
                         <td>{{ item.quantity }}</td>
                         <td>${{ item.price }}</td>
+                        <td>${{ item.price|multiply:item.quantity }}</td>
+                       
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
+        <div class="text-right m-3">
+            <h4>Total Order Price: $ {{ order.total_price }}</h4>
+        </div>
 
         <a href="{% url 'adminnorders' %}" class="btn btn-secondary">Back to Orders List</a>
     </div>

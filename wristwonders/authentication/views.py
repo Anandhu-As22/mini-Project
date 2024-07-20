@@ -200,7 +200,92 @@ def resend_otp(request):
             print(e)
     return redirect(otp_verification)
         
+
+def forgot_password(request):
+    if request.method == "POST":
+        email = request.POST.get('email')
+        print(email)
+        user = User.objects.filter(email = email).first()
+        print(user)
+
+        if user:
+            username = user.username
+            print(username)
+            otp = get_random_string(length=6,allowed_chars='0123456789')
+            subject = 'password reset'
+
+            try:
+                message = render_to_string('forgotpasswordcontent.html',{'otp':otp,'username':username})
+            
+            except Exception as e:
+                print(e)
+            from_email = 'asanandhu2001@gmail.com'
+            recipient_list = [email]
+
+            try:
+                send_mail(subject, message, from_email, recipient_list)
+                request.session['otpp'] = otp
+                request.session['emaill']=email
+                return redirect(forgot_password_otp_verification)
+                
+            except Exception as e:
+                print(e,'2nd')
+        else:
+            messages.error(request, "The email address you entered is not registered.")
+
+    return render(request,'forgotpassword.html')
+        
+
+
+
+def forgot_password_otp_verification(request):
+    if request.method == "POST":
+        given_otp = request.POST.get('otp')
+        otp = request.session.get('otpp')
+
+        if given_otp == otp:
+            print('entered forgot password')
+            del request.session['otpp']
+            return redirect(forgot_password_verification)
+        else:
+            messages.error(request,"the otp is incorrect")
+    return render(request,'otp_verification .html')
+    
+
+def forgot_password_verification(request):
+    if request.method == "POST":
+        email = request.session.get('emaill')
+        if email is None:
+            messages.error(request, "Session expired. Please try the password reset process again.")
+            return redirect(forgot_password)
+        
+        user = User.objects.filter(email=email).first()
+        
+        if user is None:
+            messages.error(request, "User not found. Please try the password reset process again.")
+            return redirect(forgot_password)
        
+        password1 = request.POST.get('password1')
+        password2 = request.POST.get('password2')
+
+        if len(password1) < 8:
+            error_message = "Password must be at least 8 characters long"
+            return render(request,'password-change.html', {'error_message': error_message})
+
+        if password1 == password2:
+            user.set_password(password1)
+            user.save()
+            del request.session['emaill']
+            return redirect(user_login)
+        else:
+            messages.error(request,'two passwords must be same')
+    return render(request,'password-change.html')
+
+
+    
+
+
+
     
 
 

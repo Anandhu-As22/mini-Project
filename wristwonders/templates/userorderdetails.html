@@ -1,0 +1,66 @@
+{% extends 'nav.html' %}
+{% load custom_filters %}
+
+{% block type %}
+{% endblock %}
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h2>Order Details</h2>
+            <hr>
+            <div class="card">
+                <div class="card-header">
+                    <h4>Order #{{ order.id }}</h4>
+                </div>
+                <div class="card-body">
+                    <p><strong>Order Date:</strong> {{ order.created_at }}</p>
+                    <p><strong>Status:</strong> {% if order.is_return %}
+                                            {% if order.return_status == 'Return requested' %}
+                                                <p style="color:black">{{ order.return_status }}</p>
+                                            {% elif order.return_status == 'Returned' %}
+                                                <p style="color:green">{{ order.return_status }}</p>
+                                            {% else %}
+                                                <p style="color:red">{{ order.return_status }}</p>
+                                            {% endif %}
+                                        {% elif order.is_cancelled %}
+                                            <p>cancelled</p>
+                                        {% else %}
+                                        <span class="badge bg-success">{{ order.status }}</span>
+                                        {% endif %}</p>
+                    <h5>Items:</h5>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order_items %}
+                            <tr>
+                                <td>{{ item.Product.Product_name }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>${{ item.price }}</td>
+                                <td>${{ item.price|multiply:item.quantity }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="text-right">
+                        <h4>Total Order Price: $ {{ order.total_price }}</h4>
+                    </div>
+                </div>
+                <div class="card-footer text-right">
+                    <a href="{% url 'userprofile' user.id %}" class="btn btn-primary">Back to Orders</a>
+                </div>
+                <div class="card-footer text-left ">
+                    <a href="{% url 'order-pdf' order.pk %}" class="btn btn-secondary" >Download </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

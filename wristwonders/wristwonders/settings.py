@@ -184,3 +184,10 @@ EMAIL_USE_TLS = True
 # EMAIL_USE_SSL = False
 EMAIL_HOST_USER = 'asanandhu2001@gmail.com'
 EMAIL_HOST_PASSWORD ='qxko kofl ahcr acep'
+
+
+
+RAZOR_KEY_ID ='rzp_test_86XtfvyElQrEXe'
+
+RAZOR_KEY_SECRET ='hjl1zuixHnMtl6Bap1HBwEnI'
+

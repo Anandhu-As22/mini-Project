@@ -4,6 +4,80 @@
 {% endblock %}
 
 {% block content %}
+<!-- 
+<form method="get" class="">
+    <select class=" m-4 rounded-pill" style="background-color: #B0BCC2;" name="sort" onchange="this.form.submit()">
+        <option value="">sort</option>
+        <option value="name">Sort by Name</option>
+        <option value="price">Sort by Price</option>
+        <option value="rating">Sort by Rating</option>
+    </select>
+</form> -->
+<!-- <div class="container">
+    <div class="row">
+   
+      <div class="col-md-6">
+        <div class="filter-wrapper">
+          <label for="filter">Filter By:</label>
+          <form method="get" class="">
+          <select class="form-control" id="filter" style="background-color: #B0BCC2;" name="filter" onchange="this.form.submit()">
+            <option value="">All</option>
+            <option value="Men">Men</option>
+            <option value="women">Women</option>
+            <option value="smart watch">Smart watch</option>
+            <option value="blue">Blue</option>
+          </select>
+        </form>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="sort-wrapper">
+          <label for="sort">Sort By:</label>
+          <form method="get" class="">
+          <select class="form-control" id="sort" style="background-color: #B0BCC2;" name="sort" onchange="this.form.submit()">
+            <option value="featured">Featured</option>
+            <option value="aA-zZ">aA-zZ</option>
+            <option value="zZ-aA">zZ-aA</option>
+            <option value="low-high">low-high price</option>
+            <option value="high-low">high-low price</option>
+          </select>
+          </form>
+        </div>
+      </div>
+    
+    </div>
+  </div> -->
+
+<div class="container">
+  <div class="row m-5" >
+          <form method="GET" class="form-inline justify-content-center mb-4" id="filter-sort-form">
+            <div class="form-group mx-2">
+                <label for="filter" class="mr-2">Filter by Category:</label>
+                <select name="filter" id="filter" class="form-control" style="background-color: #B0BCC2;" onchange="document.getElementById('filter-sort-form').submit();">
+                    <option value="">All</option>
+                    {% for category in category %}
+                        <option value="{{ category.category_name }}" {% if request.GET.filter == category.category_name %}selected{% endif %}>
+                            {{ category.category_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group mx-2">
+                <label for="sort" class="mr-2">Sort by:</label>
+                <select name="sort" id="sort" class="form-control" style="background-color: #B0BCC2;" onchange="document.getElementById('filter-sort-form').submit();">
+                    <option value="name" {% if request.GET.sort == 'name' %}selected{% endif %}>Name (A-Z)</option>
+                    <option value="aA-zZ" {% if request.GET.sort == 'aA-zZ' %}selected{% endif %}>Name (A-Z)</option>
+                    <option value="zZ-aA" {% if request.GET.sort == 'zZ-aA' %}selected{% endif %}>Name (Z-A)</option>
+                    <option value="low-high" {% if request.GET.sort == 'low-high' %}selected{% endif %}>Price (Low to High)</option>
+                    <option value="high-low" {% if request.GET.sort == 'high-low' %}selected{% endif %}>Price (High to Low)</option>
+                </select>
+            </div>
+        </form>
+  </div>      
+</div>
+
+
+
 <section class="latest-products spad">
     <div class="container">
         <div class="row" id="product-list">

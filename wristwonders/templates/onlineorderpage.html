@@ -1,0 +1,34 @@
+{% extends 'nav.html' %}
+
+{% block type %}
+{% endblock %}
+
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Online Payment</title>
+</head>
+<body>
+    <h1>Online Payment</h1>
+    <p>Order ID: {{ order_id }}</p>
+    <p>Total Price: {{ total_price }}</p>
+    <p>Payment Method: {{ payment }}</p>
+    <p>Address: {{ address.street }}, {{ address.city }}, {{ address.district }}, {{ address.state }}, {{ address.pincode }}</p>
+
+    <!-- Payment gateway integration code goes here -->
+    <form action="" method="POST">
+        <!-- Include CSRF token for security -->
+        {% csrf_token %}
+        <input type="hidden" name="order_id" value="{{ order_id }}">
+        <input type="hidden" name="total_price" value="{{ total_price }}">
+        <!-- Add more fields as required by your payment gateway -->
+        <button type="submit">Pay Now</button>
+    </form>
+</body>
+</html>
+
+
+{% endblock %}

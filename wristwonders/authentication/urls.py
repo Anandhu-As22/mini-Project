@@ -8,7 +8,10 @@ urlpatterns =[
     path('adminn/logout',views.adminn_logout,name = 'adminn-logout'),
     path('logout/',views.user_logout,name='user_logout'),
     path('otp-verification/',views.otp_verification,name='otp-verification'),
-    path('resend-otp/',views.resend_otp,name='resend-otp')
+    path('resend-otp/',views.resend_otp,name='resend-otp'),
+    path('forgot-password/',views.forgot_password,name='forgot-password'),
+    path('forgot-password-otp-verification',views.forgot_password_otp_verification,name='forgot-password-otp-verification'),
+    path('forgot-password-verification',views.forgot_password_verification,name='forgot-password-verification')
 
 
 

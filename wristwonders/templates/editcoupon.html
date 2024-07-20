@@ -1,0 +1,83 @@
+{% extends 'admin-sidebar.html' %}
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Coupon</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 50px;
+        }
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Edit Coupon</h1>
+        <div class="form-container">
+            <form method="post" novalidate>
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="coupon_code">Coupon Code</label>
+                    <input type="text" class="form-control{% if form.coupon_code.errors %} is-invalid{% endif %}" id="coupon_code" name="coupon_code" value="{{ form.coupon_code.value|default_if_none:'' }}">
+                    {% for error in form.coupon_code.errors %}
+                        <div class="invalid-feedback">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    <label for="coupon_name">Coupon Name</label>
+                    <input type="text" class="form-control{% if form.coupon_name.errors %} is-invalid{% endif %}" id="coupon_name" name="coupon_name" value="{{ form.coupon_name.value|default_if_none:'' }}">
+                    {% for error in form.coupon_name.errors %}
+                        <div class="invalid-feedback">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    <label for="discount">Discount</label>
+                    <input type="number" step="0.01" class="form-control{% if form.discount.errors %} is-invalid{% endif %}" id="discount" name="discount" value="{{ form.discount.value|default_if_none:'' }}">
+                    {% for error in form.discount.errors %}
+                        <div class="invalid-feedback">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    <label for="min_purchase_amount">Min Purchase Amount</label>
+                    <input type="number" class="form-control{% if form.min_purchase_amount.errors %} is-invalid{% endif %}" id="min_purchase_amount" name="min_purchase_amount" value="{{ form.min_purchase_amount.value|default_if_none:'' }}">
+                    {% for error in form.min_purchase_amount.errors %}
+                        <div class="invalid-feedback">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="form-group form-check">
+                    <input type="checkbox" class="form-check-input" id="is_active" name="is_active" {% if form.is_active.value %}checked{% endif %}>
+                    <label class="form-check-label" for="is_active">Is Active</label>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a href="{% url 'coupon' %}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
+{% endblock %}

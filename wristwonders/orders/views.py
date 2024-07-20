@@ -7,6 +7,17 @@ from Customers.views import Checkout,user_profile
 from authentication.views import user_login
 from django.utils import timezone
 from .models import Order,Order_item
+from adminn.models import Coupon
+from decimal import Decimal
+from django.views.decorators.csrf import csrf_exempt
+import razorpay
+from django.conf import settings
+from django.http import HttpResponseBadRequest
+
+
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
 
 
 
@@ -21,6 +32,7 @@ def Order_success(request):
         username = request.session['user']
         select_address_id = request.POST.get('address')
         payment = request.POST.get('pay-method')
+        coupon = request.POST.get('coupon')
 
         user = get_object_or_404(User, username=username)
 
@@ -41,7 +53,7 @@ def Order_success(request):
         total_price = 0
         order_items = []
 
-        for item in cart_items:
+        for item in cart_items: 
             product = item.product
 
             if item.quantity > product.stock:
@@ -51,7 +63,24 @@ def Order_success(request):
             
             total_price += item.quantity * product.price
             order_items.append((product, item.quantity, product.price))
-
+            print(total_price)
+        
+        if coupon:
+            
+            try:
+                coupon = Coupon.objects.get(coupon_code=coupon, is_active=True)
+                if total_price >= Decimal(coupon.min_purchase_amount):
+                    
+                    total_price -= float(coupon.discount)
+                else:
+                    return HttpResponse("Error: Minimum purchase amount for the coupon is not met")
+            except Coupon.DoesNotExist:
+                return HttpResponse("Error: Invalid coupon code")
+            print('after coupon applied total_price',total_price )
+        
+            
+        
+        
         order = Order.objects.create(
             user=user,
             created_at=timezone.now(),
@@ -65,7 +94,7 @@ def Order_success(request):
             payment=payment,
             payment_status='Pending'
         )
-        
+    
         for product, quantity, price in order_items:
             Order_item.objects.create(
                 order=order,
@@ -78,6 +107,10 @@ def Order_success(request):
             product.save()
         
         cart_items.delete()
+        if payment == 'razorpay':
+            request.session['total_price'] = str(total_price)
+            request.session['order_id'] = order.id
+            return redirect(paymenthomepage)
         return render(request, 'order-success.html')
     
     return redirect(Checkout)
@@ -116,4 +149,121 @@ def returnrequest(request,pk):
         order.save()
         print('return')
         return redirect(user_profile,pk = user.id)
+    return redirect(user_login)
+
+
+razorpay_client = razorpay.Client(
+    auth=(settings.RAZOR_KEY_ID, settings.RAZOR_KEY_SECRET))
+
+def paymenthomepage(request):
+    total_price=Decimal(request.session.get('total_price'))
+    currency='INR'
+    amount=float(total_price) * 100
+
+    razorpay_order = razorpay_client.order.create(dict(amount=amount,currency=currency,payment_capture='0'))
+    
+    razorpay_order_id=razorpay_order['id']
+    callback_url = 'paymenthandler/'
+    print(razorpay_order_id)
+
+    context={}
+    context['razorpay_order_id'] = razorpay_order_id
+    context['razorpay_merchant_key'] = settings.RAZOR_KEY_ID
+    context['razorpay_amount'] = amount
+    context['currency'] = currency
+    context['callback_url'] = callback_url
+
+    return render(request, 'payment.html', context=context)
+
+
+
+@csrf_exempt
+def paymenthandler(request):
+    if 'adminn' in request.session:
+        print('paymenthandeler')
+        
+        if request.method =='POST':
+            print('inside payment POSt')
+            try:
+                
+                payment_id = request.POST.get('razorpay_payment_id', '')
+                razorpay_order_id = request.POST.get('razorpay_order_id', '')
+                signature = request.POST.get('razorpay_signature', '')
+                params_dict = {
+                    'razorpay_order_id': razorpay_order_id,
+                    'razorpay_payment_id': payment_id,
+                    'razorpay_signature': signature
+                }
+                
+                
+                result = razorpay_client.utility.verify_payment_signature(
+                    params_dict)
+                
+                if result is not None:
+                    total_price=request.session.get('total_price')
+                    amount=float(total_price) * 100
+
+                    try:
+                        print("success try")
+                        # capture the payemt
+                        razorpay_client.payment.capture(payment_id, amount)
+                        
+                        order_id=request.session.get('order_id')
+                        print("ordeeeeerrrid",order_id)
+                        order=Order.objects.get(id=order_id)
+                        order.payment_status='Paid'
+                        order.save()
+                        
+                        session_data = []
+                        for key, value in request.session.items():
+                            session_data.append(f'{key}: {value}')
+                        
+                        session_details = '<br>'.join(session_data)
+                        
+                        print(session_details)
+                        
+                        del request.session['total_price']
+                        del request.session['order_id']
+
+                        return render(request, 'order-success.html')
+                    except:
+                        print("payment failed")
+                        # if there is an error while capturing payment.
+                        return render(request, 'paymentfail.html')
+                else:
+                    return render(request, 'paymentfail.html')
+            except:
+                return HttpResponseBadRequest()
+        else:
+            return HttpResponseBadRequest()
+    return redirect(user_login)
+
+
+
+def order_pdf_view(request,pk):
+    print('pdf')
+
+    if 'user' in request.session:
+        username = request.session['user']
+        user = get_object_or_404(User,username=username)
+        order = get_object_or_404(Order,id=pk)
+        order_items = Order_item.objects.filter(order_id = order.id)
+        total_order_price = sum(item.price for item in order_items)
+
+        template_path = 'orderdetailpdf.html'
+        context = {'order':order,'order_items':order_items,'total_order_price':total_order_price,'user':user}
+        # Create a Django response object, and specify content_type as pdf
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="report.pdf"'
+        # find the template and render it.
+        template = get_template(template_path)
+        html = template.render(context)
+
+        # create a pdf
+        pisa_status = pisa.CreatePDF(
+        html, dest=response)
+        # if error then show some funny view
+        if pisa_status.err:
+            return HttpResponse('We had some errors <pre>' + html + '</pre>')
+        return response
     return redirect(user_login)
