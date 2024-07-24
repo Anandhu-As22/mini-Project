@@ -191,3 +191,4 @@ RAZOR_KEY_ID ='rzp_test_86XtfvyElQrEXe'
 
 RAZOR_KEY_SECRET ='hjl1zuixHnMtl6Bap1HBwEnI'
 
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"

@@ -2,11 +2,13 @@ from django.shortcuts import render,redirect,get_object_or_404
 from authentication.views import admin_login
 from Customers.models import User
 from authentication.forms import RegisterForm
-from .forms import UpdateForm,AddCouponForm,EditCouponForm
+from .forms import UpdateForm,AddCouponForm,EditCouponForm,ProductOfferForm,CategoryOfferForm,EditCategoryOfferForm,EditProductOffersForm
 from orders.models import Order,Order_item
 from django.http import JsonResponse
 from .models import Coupon
 from django.views.decorators.csrf import csrf_exempt
+from Product.models import Category_offer,ProductOffer
+from django.views.decorators.cache import never_cache
 
 from django.views.decorators.http import require_POST
 from decimal import Decimal
@@ -286,3 +288,165 @@ def apply_coupon(request):
         'status': 'error',
         'message': 'Invalid request'
     })
+
+
+def categoryoffers(request):
+    if 'adminn' in request.session:
+        
+        categoryoffers=Category_offer.objects.all()
+        return render(request,'admin-categoryoffers.html',{'categoryoffers':categoryoffers})
+    return redirect(admin_login)
+
+def add_category_offer(request):
+    if 'adminn' in request.session:
+        if request.method=='POST':
+            form=CategoryOfferForm(request.POST)
+            if form.is_valid():
+                
+                discount_percentage=form.cleaned_data['discount_percentage']
+                start_date=form.cleaned_data['start_date']
+                end_date=form.cleaned_data['end_date']
+                category=form.cleaned_data['category']
+                
+                
+                
+                if discount_percentage < 1 :
+                    form.add_error('discount_percentage','discount percentage should not less than 0')
+                
+                if discount_percentage > 90 :
+                    form.add_error('discount_percentage','discount percentage should not greater than 90%')
+                    
+                if start_date > end_date:
+                    form.add_error('end_date','end date should be greater than start date')
+                
+                if Category_offer.objects.filter(category=category).exists():
+                    form.add_error('category','offer for this category already exist')
+                    
+                if form.errors:
+                    return render(request,'add_category_offer.html',{'form':form})
+                form.save()
+                return redirect('category-offers')
+        
+        else:
+                
+            form=CategoryOfferForm()
+        return render(request,'add_category_offer.html',{'form':form})
+    return redirect(admin_login)
+
+
+def editCategoryOffer(request,pk):
+    if 'adminn' in request.session:
+        instance_to_be_edited=Category_offer.objects.get(id=pk)
+        if request.POST:
+            form=EditCategoryOfferForm(request.POST,instance=instance_to_be_edited)
+            
+            if form.is_valid():
+                discount_percentage=form.cleaned_data['discount_percentage']
+                start_date=form.cleaned_data['start_date']
+                end_date=form.cleaned_data['end_date']
+                category=form.cleaned_data['category']
+                
+                if discount_percentage < 1:
+                    form.add_error('discount_percentage','should greater than 0')
+                    
+                if discount_percentage > 90 :
+                    form.add_error('discount_percentage','discount percentage should not greater than 90%')
+                    
+                if start_date > end_date:
+                    form.add_error('end_date','end date should be greater than start date')
+                    
+                # if Category_offer.objects.filter(category=category).exists():
+                #     form.add_error('category','offer for this category already exist')
+
+                if form.errors:
+                    return render(request,'admin-edit-Categoryofferform.html',{'form':form})
+                
+                
+                form.save()
+                return redirect('category-offers')
+        else:
+                    
+            form=EditCategoryOfferForm(instance=instance_to_be_edited)
+        return render(request,'admin-edit-Categoryofferform.html',{'form':form})
+    return redirect(admin_login)
+
+@never_cache
+def deleteCategoryOffer(request,pk):
+    if 'adminn' in request.session:
+        category_offer=Category_offer.objects.get(id=pk)
+        category_offer.delete()
+        return redirect(categoryoffers)
+    return redirect(admin_login)
+
+
+@never_cache
+def productoffers(request):
+    if 'adminn' in request.session:
+        productoffers=ProductOffer.objects.all()
+        
+        return render(request,'admin-productoffers.html',{'productoffers':productoffers})
+    return redirect(admin_login)
+
+@never_cache
+def add_product_offer(request):
+    if 'adminn' in request.session:
+        if request.method=='POST':
+            form=ProductOfferForm(request.POST)
+            if form.is_valid():
+                discount_price=form.cleaned_data['discount_price']
+                product=form.cleaned_data['product']
+                start_date=form.cleaned_data['start_date']
+                end_date=form.cleaned_data['end_date']
+                
+                
+                if discount_price < 0:
+                    form.add_error('discount_price','should greater than 0')
+                
+                if discount_price >= product.price:
+                    form.add_error('discount_price','should not be greater than or equal to product price')
+                
+                if start_date > end_date:
+                    form.add_error('end_date','end date should be greater than start date')
+                    
+                if form.errors:
+                    return render(request,'admin-add-product-offer.html',{'form':form})
+                form.save()
+                return redirect(productoffers)
+        form=ProductOfferForm()
+        return render(request,'admin-add-product-offer.html',{'form':form})
+    return redirect(admin_login)
+
+@never_cache
+def editProductOffers(request,pk):
+    if 'adminn' in request.session:
+        instance_to_be_edited=ProductOffer.objects.get(id=pk)
+        if request.POST:
+            form=EditProductOffersForm(request.POST,instance=instance_to_be_edited)
+            if form.is_valid():
+                discount_price=form.cleaned_data['discount_price']
+                start_date=form.cleaned_data['start_date']
+                end_date=form.cleaned_data['end_date']
+                
+                print("discount",discount_price)
+                if discount_price < 1:
+                    form.add_error('discount_price','price should be greater than 0')
+                    
+                if start_date > end_date:
+                    form.add_error('end_date','end date should be greater than start date')
+                
+                if form.errors:
+                    return render(request,'admin-EditProductOffers.html',{'form':form})
+                form.save()
+                return redirect(productoffers)
+
+        form=EditProductOffersForm(instance=instance_to_be_edited)
+        return render(request,'admin-EditProductOffers.html',{'form':form})
+    return redirect(admin_login)
+
+@never_cache
+def deleteProductOffer(request,pk):
+    if 'adminn' in request.session:
+        product_offer=ProductOffer.objects.get(id=pk)
+        product_offer.delete()
+        return redirect(productoffers)
+    return redirect(admin_login)

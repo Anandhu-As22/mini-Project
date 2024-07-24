@@ -19,6 +19,7 @@ from django.http import HttpResponse
 from django.template.loader import get_template
 from xhtml2pdf import pisa
 
+from Product.models import ProductOffer,Category_offer
 
 
 
@@ -55,23 +56,50 @@ def Order_success(request):
 
         for item in cart_items: 
             product = item.product
+            category_offer = Category_offer.objects.filter(category=item.product.category,
+                                                            start_date__lte=timezone.now(),
+                                                            end_date__gte=timezone.now()).first()
+                                
+                
+            product_offer=ProductOffer.objects.filter(product=item.product,start_date__lte=timezone.now(),end_date__gte=timezone.now()).first()
+                
+            if category_offer:
+                category_product_price = Decimal(item.product.price) - (Decimal(item.product.price) * category_offer.discount_percentage / Decimal('100'))
+            if product_offer:
+                product_product_price=Decimal(item.product.price)-Decimal(product_offer.discount_price)
+            
+            if category_offer and product_offer:
+                if category_product_price < product_product_price:
+                    product_price = category_product_price
+                else:
+                    product_price = product_product_price
+            elif category_offer:
+                product_price=category_product_price
+            elif product_offer:
+                product_price = product_product_price
+            else:
+                product_price = item.product.price
 
             if item.quantity > product.stock:
                 print('stock limit exceeds')
                 
                 return redirect(Checkout)
             
-            total_price += item.quantity * product.price
+            total_price += item.quantity * product_price
             order_items.append((product, item.quantity, product.price))
             print(total_price)
-        
+        # total_price=sum( total_price for item in cart_items)
+        print(total_price)
+
+
+
         if coupon:
             
             try:
                 coupon = Coupon.objects.get(coupon_code=coupon, is_active=True)
                 if total_price >= Decimal(coupon.min_purchase_amount):
                     
-                    total_price -= float(coupon.discount)
+                    total_price -= coupon.discount
                 else:
                     return HttpResponse("Error: Minimum purchase amount for the coupon is not met")
             except Coupon.DoesNotExist:
@@ -108,6 +136,7 @@ def Order_success(request):
         
         cart_items.delete()
         if payment == 'razorpay':
+            print("haii")
             request.session['total_price'] = str(total_price)
             request.session['order_id'] = order.id
             return redirect(paymenthomepage)
@@ -159,6 +188,7 @@ def paymenthomepage(request):
     total_price=Decimal(request.session.get('total_price'))
     currency='INR'
     amount=float(total_price) * 100
+    print(amount)
 
     razorpay_order = razorpay_client.order.create(dict(amount=amount,currency=currency,payment_capture='0'))
     
@@ -172,6 +202,7 @@ def paymenthomepage(request):
     context['razorpay_amount'] = amount
     context['currency'] = currency
     context['callback_url'] = callback_url
+    print("yess")
 
     return render(request, 'payment.html', context=context)
 
@@ -179,6 +210,7 @@ def paymenthomepage(request):
 
 @csrf_exempt
 def paymenthandler(request):
+    print("hyyy")
     if 'adminn' in request.session:
         print('paymenthandeler')
         
@@ -227,10 +259,12 @@ def paymenthandler(request):
 
                         return render(request, 'order-success.html')
                     except:
+                        
                         print("payment failed")
                         # if there is an error while capturing payment.
                         return render(request, 'paymentfail.html')
                 else:
+                    print("failed")
                     return render(request, 'paymentfail.html')
             except:
                 return HttpResponseBadRequest()

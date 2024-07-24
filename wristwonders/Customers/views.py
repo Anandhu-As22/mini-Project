@@ -1,12 +1,14 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from authentication.views import user_login
-from Product.models import Category,Product
-from .models import User,Cart,Cart_items,User_address
+from Product.models import Category,Product,Category_offer,ProductOffer
+from .models import User,Cart,Cart_items,User_address,Wishlist,Wishlist_items
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from .forms import addaddressform,editaddressform
 from django.contrib import messages
 from orders.models import Order,Order_item
+from django.utils import timezone
+from decimal import Decimal
 
 # Create your views here.
 
@@ -36,9 +38,47 @@ def product_detail(request,pk):
 
     if 'user' in request.session:
         print(request.session['user'])
+        username = request.session['user']
+        user = get_object_or_404(User, username=username)
         product =get_object_or_404(Product,pk=pk)
         related_products = Product.objects.filter(category=product.category).exclude(pk=pk)
-        return render(request,'product-page.html',{'product':product,'related_products':related_products})
+        category_offer = Category_offer.objects.filter(category=product.category,
+                                                   start_date__lte=timezone.now(),
+                                                   end_date__gte=timezone.now()).first()
+    
+    
+        product_offer = ProductOffer.objects.filter(product=product,
+                                                 start_date__lte=timezone.now(),
+                                                 end_date__gte=timezone.now()).first()
+        try:
+            wishlist = Wishlist.objects.get(user= user)
+            product_in_wishlist = Wishlist_items.objects.filter(product=product, wishlist=wishlist).exists()
+        except Wishlist.DoesNotExist:
+            pass
+
+        if category_offer:
+        
+            category_discounted_price = Decimal(product.price) - (Decimal(product.price) * category_offer.discount_percentage / Decimal(100))
+
+        
+    
+        if product_offer:
+            
+            product_discounted_price = Decimal(product.price) - Decimal(product_offer.discount_price)
+            
+        discounted_price = product.price
+        if category_offer and product_offer:
+            if category_discounted_price < product_discounted_price:
+                discounted_price = category_discounted_price
+            else:
+                discounted_price = product_discounted_price
+        elif category_offer:
+            discounted_price = category_discounted_price
+        elif product_offer:
+            discounted_price = product_discounted_price
+        print("dicsount price",discounted_price)
+       
+        return render(request,'product-page.html',{'product':product,'related_products':related_products,'discounted_price': discounted_price,'product_in_wishlist': product_in_wishlist})
     return redirect(user_login)
 
 
@@ -51,6 +91,37 @@ def view_cart(request):
         try:
             cart = Cart.objects.get(customer=request.user)
             cart_items = Cart_items.objects.filter(cart=cart)
+            for item in cart_items:
+                
+                category_offer = Category_offer.objects.filter(category=item.product.category,
+                                                               start_date__lte=timezone.now(),
+                                                               end_date__gte=timezone.now()).first()
+                
+                product_offer=ProductOffer.objects.filter(product=item.product,start_date__lte=timezone.now(),end_date__gte=timezone.now()).first()
+                
+                
+                
+                
+                if category_offer:
+                    category_product_price = Decimal(item.product.price) - (Decimal(item.product.price) * category_offer.discount_percentage / Decimal('100'))
+                
+                if product_offer:
+                    product_product_price=Decimal(item.product.price)-Decimal(product_offer.discount_price)
+                    
+                if category_offer and product_offer:
+                    if category_product_price < product_product_price:
+                        item.product.price = category_product_price
+                    else:
+                        item.product.price = product_product_price
+                elif category_offer:
+                    item.product.price=category_product_price
+                elif product_offer:
+                    item.product.price = product_product_price
+                    
+                else:
+                    item.product.price = item.product.price
+                
+                item.total_price = item.product.price * item.quantity
             total_price = sum(item.get_total() for item in cart_items)
         except Cart.DoesNotExist:
             cart_items = []
@@ -62,10 +133,21 @@ def add_to_cart(request, pk):
     if 'user' in request.session:
         username = request.session['user']
         user = get_object_or_404(User, username=username)
+        product = get_object_or_404(Product, pk=pk)
+        category_offer = Category_offer.objects.filter(category=product.category,
+                                                           start_date__lte=timezone.now(),
+                                                           end_date__gte=timezone.now()).first()
+        
+        product_price = Decimal(product.price)
+        if category_offer:
+            print("yes inside this")
+            category_discounted_price = product_price - (product_price * category_offer.discount_percentage / Decimal(100))
+        else:
+            product_price = product.price
 
         cart, created = Cart.objects.get_or_create(customer=user)
 
-        product = get_object_or_404(Product, pk=pk)
+        
         cart_item, created = Cart_items.objects.get_or_create(cart=cart, product=product)
         if created:
             cart_item.quantity = 1
@@ -115,6 +197,43 @@ def update_cart(request, pk):
         else:
             cart_item.quantity = quantity
             cart_item.save()
+
+        cart_items = Cart_items.objects.filter(cart=cart_item.cart)
+        
+        for item in cart_items:
+
+            category_offer = Category_offer.objects.filter(category=item.product.Category,
+                                                           start_date__lte=timezone.now(),
+                                                           end_date__gte=timezone.now()).first()
+            
+            product_offer=ProductOffer.objects.filter(product=item.product,start_date__lte=timezone.now(),end_date__gte=timezone.now()).first()
+            
+            product_price=None
+            
+            if category_offer:
+                category_product_price = Decimal(item.product.price) - (Decimal(item.product.price) * category_offer.discount_percentage / Decimal('100'))
+                
+            if product_offer:
+                    product_product_price=Decimal(item.product.price)-Decimal(product_offer.discount_price)
+                    
+            if category_offer and product_offer:
+                if category_product_price < product_product_price:
+                    product_price = category_product_price
+                else:
+                    product_price = product_product_price
+            elif category_offer:
+                    product_price=category_product_price
+            elif product_offer:
+                    product_price = product_product_price
+            else:
+                product_price = item.product.price
+            
+            
+            item.total_price = product_price * item.quantity
+            item.save()  # Save each item after updating total_price
+        
+        total_price = sum(item.total_price for item in cart_items)
+        
 
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
             total_price = sum(item.get_total() for item in Cart_items.objects.filter(cart=cart_item.cart))
@@ -233,8 +352,32 @@ def Checkout(request):
                     if item.quantity > item.product.stock:
                         messages.error(request,f"Quantity for {item.product.Product_name}.exceeds available stock")
                         return redirect(view_cart)
+                    category_offer = Category_offer.objects.filter(category=item.product.category,
+                                                               start_date__lte=timezone.now(),
+                                                               end_date__gte=timezone.now()).first()
+            
+                    product_offer=ProductOffer.objects.filter(product=item.product,start_date__lte=timezone.now(),end_date__gte=timezone.now()).first()
                     
-                    item.total_price = item.product.price * item.quantity
+                    if category_offer:
+                        category_product_price = Decimal(item.product.price) - (Decimal(item.product.price) * category_offer.discount_percentage / Decimal('100'))
+                    if product_offer:
+                        product_product_price=Decimal(item.product.price)-Decimal(product_offer.discount_price)
+                    
+                    if category_offer and product_offer:
+                        if category_product_price < product_product_price:
+                            product_price = category_product_price
+                        else:
+                            product_price = product_product_price
+                    elif category_offer:
+                        product_price=category_product_price
+                    elif product_offer:
+                        product_price = product_product_price
+                    else:
+                        product_price = item.product.price
+                    
+                    item.total_price = product_price * item.quantity
+                    
+                    # item.total_price = item.product.price * item.quantity
 
 
                 total_price = sum(item.total_price for item in cart_items)
@@ -293,3 +436,54 @@ def user_order_details(request,pk):
         return render(request,'userorderdetails.html',{'order':order,'order_items':order_items,'total_order_price':total_order_price,'user':user})
     return redirect(user_login)
 
+
+def wish_list(request):
+    if 'user' in request.session:
+        username = request.session['user']
+        user = get_object_or_404(User,username=username)
+        wishlist = get_object_or_404(Wishlist,user = user)
+        wishlist_items = Wishlist_items.objects.filter(wishlist=wishlist)
+
+        return render(request,'wishlist.html',{'wishlist':wishlist,'wishlistitems':wishlist_items})
+    return redirect(user_login)
+
+
+def add_wishlist(request,pk):
+    print('add to wishlist')
+    if 'user' in request.session:
+        username = request.session['user']
+        user = get_object_or_404(User,username=username)
+        product = get_object_or_404(Product,pk=pk)
+
+        wishlist,created = Wishlist.objects.get_or_create(user = user)
+        wishlist_item,created = Wishlist_items.objects.get_or_create(product=product, wishlist=wishlist)
+        return JsonResponse({'status': 'success', 'message': 'Added to wishlist'})
+    return JsonResponse({'status': 'error', 'message': 'User not logged in'})
+
+    #     return redirect(wish_list)
+    # return redirect(user_login)
+
+def remove_wishlist(request,pk):
+    if 'user' in request.session:
+        username = request.session['user']
+        user = get_object_or_404(User, username=username)
+        product = get_object_or_404(Product, pk=pk)
+
+        try:
+            wishlist = Wishlist.objects.get(user=user)
+            wishlistitem = Wishlist_items.objects.get(product=product, wishlist=wishlist)
+            wishlistitem.delete()
+        except Wishlist_items.DoesNotExist:
+            # If the item does not exist, handle it gracefully
+            return redirect('wishlist')  # Redirect to the wishlist page
+
+        return redirect('wishlist')  # Redirect to the wishlist page
+    else:
+        return redirect('user_login')
+
+
+
+
+        
+
+        

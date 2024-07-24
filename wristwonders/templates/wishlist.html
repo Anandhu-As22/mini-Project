@@ -1,0 +1,73 @@
+{% extends 'nav.html' %}
+{% load static %}
+{% block type %}
+{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <div class="padding-top-2x mt-2 hidden-lg-up"></div>
+    <!-- Wishlist Table-->
+    <div class="table-responsive wishlist-table margin-bottom-none">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th class="text-center"><a class="btn btn-sm btn-outline-danger" href="#">Action</a></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in wishlistitems %}
+                <tr>
+                    <td>
+                        <div class="product-item">
+                            
+                            <a class="product-thumb" href="#"><img src="{{ item.product.images.all.first.image.url }}"  alt="Product"></a>
+                            
+                            <div class="product-info">
+                                <h4 class="product-title"><a>{{ item.product.Product_name }}</a></h4>
+                                <div class="text-lg text-medium text-muted">${{item.product.price}}</div>
+                                <div>Availability:
+                                    {% if item.product.stock > 0 %}
+                                    <div class="d-inline text-success">In Stock</div>
+                                    {% else %}
+                                    <div class="d-inline text-danger">Not in Stock</div>
+                                    {% endif %}
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="text-center"><a class="remove-from-cart btn btn-sm btn-outline-danger" href="{% url 'remove-wishlist' item.product.id %}" data-toggle="tooltip" title="Remove item">
+                        Remove <i class="icon-cross"></i>
+                    </a>
+
+                        
+
+                    <div>
+                    </div>
+                </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <hr class="mb-4">
+    
+</div>
+
+<style>
+    .wishlist-image {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+    }
+    .product-thumb {
+        display: inline-block;
+        width: 150px;
+        height: 150px;
+        margin-right: 15px;
+    }
+</style>
+
+
+
+{% endblock %}

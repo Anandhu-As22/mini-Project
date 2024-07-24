@@ -3,6 +3,7 @@ from Customers.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.forms import ModelForm
 from .models import Coupon
+from Product.models import Category_offer,ProductOffer
 
 
 class UpdateForm(ModelForm):
@@ -29,5 +30,35 @@ class EditCouponForm(ModelForm):
         fields='__all__'  
         exclude = ['created_at'] 
 
+class CategoryOfferForm(forms.ModelForm):
+    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    
+    class Meta:
+        model=Category_offer
+        fields='__all__'
+        
+        
+class EditCategoryOfferForm(forms.ModelForm):
+    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    class Meta:
+        model=Category_offer
+        fields='__all__'
+        
+class ProductOfferForm(forms.ModelForm):
+    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    
+    class Meta:
+        model=ProductOffer
+        fields='__all__'
+        
+class EditProductOffersForm(forms.ModelForm):
+    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    class Meta:
+        model=ProductOffer
+        fields='__all__'
 
 

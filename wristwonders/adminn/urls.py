@@ -17,6 +17,18 @@ urlpatterns =[
      path('apply-coupon/',views.apply_coupon, name='apply_coupon'),
     
 
+    path('category-offers/',views.categoryoffers,name="category-offers"),
+    path('add-category-offer/', views.add_category_offer, name='add-category-offer'),
+    path('edit-category-offer/<pk>',views.editCategoryOffer,name='edit-category-offer'),
+    path('delete-categoryoffer/<pk>',views.deleteCategoryOffer,name="delete-categoryoffer"),
+    
+
+    path('product-offers/',views.productoffers,name="product-offers"),
+    path('add-product-offer/', views.add_product_offer, name='add-product-offer'),
+    path('edit-product-offers/<pk>',views.editProductOffers,name="edit-product-offers"),
+    path('delete-productoffer/<pk>',views.deleteProductOffer,name="delete-productoffer"),
+    
+
 
 
 ]

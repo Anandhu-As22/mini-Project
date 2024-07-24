@@ -140,7 +140,14 @@
                                         {% endif %}
                                         
                                     </td>
-                                    <td>{{ order.payment_status }}</td>
+                                    <td>
+                                        {% if order.is_cancelled %}
+                                            <p>order cancelled</p>
+
+                                        {% else %}
+                                            <p>{{ order.payment_status }}</p>
+                                        {% endif %}
+                                    </td>
                                     <td>{{ order.total_price }}</td>
                                     <td><a href="{% url 'userorderdetails' order.id %}"><button class="btn btn-outline-primary btn-sm">Details</button></a>
                                         {% if order.is_cancelled %}

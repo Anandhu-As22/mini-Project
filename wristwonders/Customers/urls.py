@@ -15,5 +15,10 @@ urlpatterns =[
     path('delete-address/<int:pk>/',views.delete_address,name='delete-address'),
     path('checkout/',views.Checkout,name='checkout'),
     path('allproducts/',views.all_products,name='allproducts'),
-    path('user-order-details/<int:pk>/',views.user_order_details,name='userorderdetails')
+    path('user-order-details/<int:pk>/',views.user_order_details,name='userorderdetails'),
+    path('wishlist/',views.wish_list,name='wishlist'),
+    path('add-wishlist/<int:pk>/',views.add_wishlist,name='add-wishlist'),
+    path('remove-wishlist/<int:pk>/',views.remove_wishlist,name='remove-wishlist')
+
+
 ]   
