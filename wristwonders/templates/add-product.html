@@ -8,16 +8,26 @@
     <div class="card shadow-sm p-4"style="border-radius:10px">
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
+            {% if messages %}
+                <div class="alert-container">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
             <div class="form-group">
                 {{ product_form.as_p }}
             </div>
+            
 
             <input type="file" id="files" name="images" multiple>
             
             
             <button type="submit" class="btn btn-primary btn-block">Add Product</button>
         </form>
-    </div>x
+    </div>
 </div>
 {% endblock %}
 

@@ -54,6 +54,45 @@ class Wishlist_items(models.Model):
     product = models.ForeignKey(Product,on_delete=models.CASCADE)
 
 
+class Wallet(models.Model):
+    user = models.OneToOneField(User,on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10,decimal_places=2,default=0.0)
+
+    def __str__(self) -> str:
+        return f"{self.user.username}'s Wallet - Balance: ${self.amount}"
+    
+    def credit(self,amount):
+        self.amount += amount
+        self.save()
+
+    def debit(self,amount):
+        if self.amount > amount:
+            self.amount -= amount
+            self.save()
+            return True
+        return False
+    
+class Transaction(models.Model):
+    Transaction_types ={
+        ('Credit','credit'),
+        ('debit','Debit'),
+        ('refund','Refund')
+
+    }
+    
+    
+    wallet = models.ForeignKey(Wallet,on_delete=models.CASCADE)
+    transaction_type = models.CharField(max_length=10,choices=Transaction_types)
+    amount = models.DecimalField(max_digits=10,decimal_places=2)
+    Transaction_date = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self) -> str:
+        return f"{self.transaction_type.title()} - ${self.amount} - {self.Transaction_date.strftime('%Y-%m-%d %H:%M:%S')}"
+
+
+    
+
+
 
 
 

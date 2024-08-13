@@ -51,7 +51,7 @@
                             </td>
                             <td class="price-col">{{ item.product.price }}</td>
                             <td class="quantity-col">
-                                <input type="number" value="{{ item.quantity }}" class="quantity-input form-control" data-item-id="{{ item.id }}">
+                                <input type="number" value="{{ item.quantity }}" class="quantity-input form-control" data-item-id="{{ item.id }}" min="1" max="{{ item.product.stock }}">
                             </td>
                             <td class="total">{{ item.get_total }}</td>
                             <td>
@@ -61,6 +61,13 @@
                         {% endfor %}
                     </tbody>
                 </table>
+            </div>
+            <div class="alert-container">
+                {% for message in messages %}
+                    <div class="alert alert-danger">
+                        {{ message }}
+                    </div>
+                {% endfor %}
             </div>
             <div class="shopping-method">
                 <div class="container">
@@ -99,6 +106,11 @@
         {% endif %}
     </div>
     <!-- Cart Page Section End -->
+    <style>
+        .alert-container {
+            margin: 20px;
+        }
+        </style>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Add jQuery -->
     <script>
@@ -148,5 +160,19 @@
                 });
             });
         });
+
+    function validateQuantity(input) {
+    const minValue = parseInt(input.getAttribute('min'));
+    const maxValue = parseInt(input.getAttribute('max'));
+    let value = parseInt(input.value);
+    
+    if (value < minValue) {
+        input.value = minValue;
+        alert("Quantity cannot be less than " + minValue);
+    } else if (value > maxValue) {
+        input.value = maxValue;
+        alert("Quantity cannot be more than " + maxValue);
+    }
+}
     </script>
 {% endblock %}

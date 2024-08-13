@@ -19,6 +19,7 @@ class Order(models.Model):
         ('Return Requested', 'Return Requested'),
         ('Returned', 'Returned'),
         ('Rejected', 'Rejected')
+        
     )
     PAYMENT_STATUS_CHOICES=(
         ('Pending','Pending'),
@@ -51,3 +52,14 @@ class Order_item(models.Model):
 
     def __str__(self):
         return f"OrderItem{self.id}"
+    
+
+class Order_cancellation(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='cancellations')
+    reason = models.TextField()
+    cancelled_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self) -> str:
+        return f"Cancellation for Order {self.order.id} by {self.order.user.username}"
+    
+

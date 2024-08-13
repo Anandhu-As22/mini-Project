@@ -104,10 +104,17 @@
                         
                         
                         <ul class="tags">
-                            <li><span>stock :</span>{{ product.stock }}</li> 
+                           
                             <li><span>Category :</span> {{ product.category.category_name }}</li>
                             
                         </ul>
+                        {% if product.stock < 10 %}
+                            <div class="alert alert-warning" role="alert">
+                                <strong>Limited Stock!</strong> Only {{ product.stock }} items left in stock. Hurry up before it runs out!
+                            </div>
+                        {% endif %}
+
+
                         <p><strong>Product description</strong></p>
                         <p>{{ product.description }}</p>
                         <!-- <div class="product-quantity">

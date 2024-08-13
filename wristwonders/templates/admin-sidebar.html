@@ -1,88 +1,111 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-
+    
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" type="text/css">
-        <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}" type="text/css">
-        <link rel="stylesheet" href="{% static 'css/nice-select.css' %}" type="text/css">
-        <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}" type="text/css">
-        <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}" type="text/css">
-        <link rel="stylesheet" href="{% static 'css/slicknav.min.css' %}" type="text/css">
-        <link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css">
-        
+    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'css/nice-select.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'css/slicknav.min.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'css/stylee.css' %}" type="text/css">
+
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            
+        }
+        .container-fluid {
+            display: flex;
+            height: 100%;
+        }
+        .sidebar {
+            flex: 0 0 250px; /* Adjust the width as needed */
+            background-color: #343a40; /* bg-dark */
+            color: white;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .min-vh-100 {
+            height: 100vh !important;
+        }
+    </style>
 </head>
 <body>
     <div class="container-fluid">
-        <div class="row flex-nowrap">
-            <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-dark">
-                <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
-                    <a href="/" class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-                        <span class="fs-5 d-none d-sm-inline">Menu</span>
-                    </a>
-                    <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
-                        <li class="nav-item">
-                            <a href="{% url 'admin-home' %}" class="nav-link align-middle px-0">
-                                <i class="fs-4 bi-house"></i> <span class="ms-1 d-none d-sm-inline">Home</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#submenu1" data-bs-toggle="collapse" class="nav-link px-0 align-middle">
-                                <i class="fs-4 bi-speedometer2"></i> <span class="ms-1 d-none d-sm-inline">Dashboard</span> </a>
-                            <ul class="collapse show nav flex-column ms-1" id="submenu1" data-bs-parent="#menu">
-                                <li class="w-100">
-                                    <a href="{% url 'Category' %}" class="nav-link px-0"> <span class="d-none d-sm-inline">Category</span> </a>
-                                </li>
-                                <li>
-                                    <a href="{% url 'product-list' %}" class="nav-link px-0"> <span class="d-none d-sm-inline">Products</span> </a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="{% url 'adminnorders' %}" class="nav-link px-0 align-middle">
-                                <i class="fs-4 bi-table"></i> <span class="ms-1 d-none d-sm-inline">Orders</span></a>
-                        </li>
-                        <li>
-                            <a href="{% url 'coupon' %}" class="nav-link px-0 align-middle">
-                                <i class="fs-4 bi-table"></i> <span class="ms-1 d-none d-sm-inline">Coupons</span></a>
-                        </li>
-                        <li>
-                            <a href="{% url 'category-offers' %}" class="nav-link px-0 align-middle">
-                                <i class="fs-4 bi-table"></i> <span class="ms-1 d-none d-sm-inline"> category Offers</span></a>
-                        </li>
-                        <li>
-                            <a href="{% url 'product-offers' %}" class="nav-link px-0 align-middle">
-                                <i class="fs-4 bi-table"></i> <span class="ms-1 d-none d-sm-inline"> product Offers</span></a>
-                        </li>
-                        
-                        <li>
-                            <a href="{% url 'adminn-user-list' %}" class="nav-link px-0 align-middle">
-                                <i class="fs-4 bi-people"></i> <span class="ms-1 d-none d-sm-inline">Customers</span> </a>
-                        </li>
-                    </ul>
-                    <hr>
-                    <div class="dropdown pb-4">
-                        <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="https://github.com/mdo.png" alt="hugenerd" width="30" height="30" class="rounded-circle">
-                            <span class="d-none d-sm-inline mx-1">Admin</span>
+        <div class="sidebar">
+            <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
+            
+                <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
+                    <li class="nav-item">
+                        <a href="{% url 'admin-home' %}" class="nav-link align-middle px-0">
+                            <i class="fs-4 bi-house"></i> <span class="ms-1 d-none d-sm-inline">Home</span>
                         </a>
+                    </li>
+                    <li>
                         
-                    </div>
-                    <div>
-                        <a href="{% url 'adminn-logout' %}">Logout</a>
-                    </div>
+                        <ul class="collapse show nav flex-column ms-1" id="submenu1" data-bs-parent="#menu">
+                            <li class="w-100">
+                                <a href="{% url 'Category' %}" class="nav-link px-0"> <span class="d-none d-sm-inline">Category</span> </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'product-list' %}" class="nav-link px-0"> <span class="d-none d-sm-inline">Products</span> </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="{% url 'adminnorders' %}" class="nav-link px-0 align-middle">
+                            <i class="fs-4 bi-table"></i> <span class="ms-1 d-none d-sm-inline">Orders</span></a>
+                    </li>
+                    <li>
+                        <a href="{% url 'coupon' %}" class="nav-link px-0 align-middle">
+                            <i class="fs-4 bi-table"></i> <span class="ms-1 d-none d-sm-inline">Coupons</span></a>
+                    </li>
+                    <li>
+                        <a href="{% url 'category-offers' %}" class="nav-link px-0 align-middle">
+                            <i class="fs-4 bi-table"></i> <span class="ms-1 d-none d-sm-inline"> category Offers</span></a>
+                    </li>
+                    <li>
+                        <a href="{% url 'product-offers' %}" class="nav-link px-0 align-middle">
+                            <i class="fs-4 bi-table"></i> <span class="ms-1 d-none d-sm-inline"> product Offers</span></a>
+                    </li>
+                    <li>
+                        <a href="{% url 'adminn-user-list' %}" class="nav-link px-0 align-middle">
+                            <i class="fs-4 bi-people"></i> <span class="ms-1 d-none d-sm-inline">Customers</span> </a>
+                    </li>
+                </ul>
+                <hr>
+                <div>
+                    <a href="{% url 'adminn-logout' %}" class="text-white text-decoration-none">Logout</a>
                 </div>
-            </div>
-            <div class="col py-3">
-                {% block content %}
-                Content area...
-                {% endblock %}
+                <div class="dropdown pb-4">
+                    <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                        
+                        <span class="d-none d-sm-inline mx-1">Admin</span>
+                    </a>
+                </div>
+                
             </div>
         </div>
+        <div class="content">
+            {% block content %}
+            Content area...
+            {% endblock %}
+        </div>
     </div>
+
     <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
     <script src="{% static 'js/jquery.magnific-popup.min.js' %}"></script>

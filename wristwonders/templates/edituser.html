@@ -1,0 +1,35 @@
+{% extends 'nav.html' %}
+
+{% block type %}
+<!-- Additional content if needed -->
+{% endblock %}
+
+{% block content %}
+
+
+<div class="container mt-5 mb-5" style="max-width: 600px;">
+    <h3 class="mb-4 text-center" style="font-family: 'Arial', sans-serif; color: #333; font-weight: bold;">
+        Edit Your Profile
+    </h3>
+    <div class="card shadow-sm p-4" style="border-radius: 10px; border: none;">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            
+
+            <!-- Form Fields -->
+            <div class="form-group">
+                {{ form.as_p }}
+            </div>
+            
+            <!-- Action Buttons -->
+            <button type="submit" class="btn btn-primary btn-block" style="background-color: #007bff; border: none; border-radius: 25px; font-weight: bold; box-shadow: 0 4px 6px rgba(0, 123, 255, 0.4);">
+                Save Changes
+            </button>
+            <button type="button" class="btn btn-primary btn-block" style="background-color: #7d8287; border: none; border-radius: 25px; font-weight: bold; box-shadow: 0 4px 6px rgba(0, 123, 255, 0.4);">
+               cancel
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

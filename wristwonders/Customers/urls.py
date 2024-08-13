@@ -6,6 +6,7 @@ urlpatterns =[
     path('home',views.Home_page,name ='home' ),
     path('product-detail/<int:pk>/',views.product_detail,name='product-detail' ),
     path('user-profile/<int:pk>/',views.user_profile,name='userprofile'),
+    path('user-edit/<int:pk>/',views.edit_user,name='edit-user'),
     path('cart/',views.view_cart,name='view-cart'),
     path('add-to-cart/<int:pk>/',views.add_to_cart,name='add-cart'),
     path('remove_cart/<int:pk>/',views.remove_cart, name='remove_cart'),
@@ -18,7 +19,12 @@ urlpatterns =[
     path('user-order-details/<int:pk>/',views.user_order_details,name='userorderdetails'),
     path('wishlist/',views.wish_list,name='wishlist'),
     path('add-wishlist/<int:pk>/',views.add_wishlist,name='add-wishlist'),
-    path('remove-wishlist/<int:pk>/',views.remove_wishlist,name='remove-wishlist')
+    path('remove-wishlist/<int:pk>/',views.remove_wishlist,name='remove-wishlist'),
+    path('add_funds/', views.add_funds, name='add_funds')
+
+
+
+    
 
 
 ]   

@@ -2,6 +2,8 @@ from django.db import models
 from django.forms import fields,ModelForm,inlineformset_factory
 from .models import Category,Product,product_image
 from django import forms
+from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 
 
 
@@ -46,7 +48,10 @@ class Update_form(forms.ModelForm):
 
 
 # product form
+
+
 class Product_Form(ModelForm):
+    
     class Meta:
         model = Product
         fields = '__all__'
@@ -59,10 +64,25 @@ class Product_Form(ModelForm):
             'stock': forms.NumberInput(attrs={'class': 'form-control'}),
         }
 
+
 # class Product_Image_Form(forms.ModelForm):
 #     class Meta:
         
 #         model = product_image
 #         fields = ['image']
 
-ProductImageFormSet = inlineformset_factory(Product, product_image, form=forms.ModelForm, fields=['image'], extra=3)
+ProductImageFormSet = inlineformset_factory(Product, product_image, fields=['image'], extra=1,can_delete=True)
+
+
+
+class Product_edit_form(forms.ModelForm):
+    class Meta:
+        model = Product
+        fields = ['Product_name','description','price','category','stock']
+        widgets = {
+            'Product_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control'}),
+            'price': forms.NumberInput(attrs={'class': 'form-control'}),
+            'category': forms.Select(attrs={'class': 'form-control'}),  # Ensure the field name matches the model
+            'stock': forms.NumberInput(attrs={'class': 'form-control'}),
+        }

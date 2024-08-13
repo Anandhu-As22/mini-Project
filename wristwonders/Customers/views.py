@@ -1,10 +1,10 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from authentication.views import user_login
 from Product.models import Category,Product,Category_offer,ProductOffer
-from .models import User,Cart,Cart_items,User_address,Wishlist,Wishlist_items
+from .models import User,Cart,Cart_items,User_address,Wishlist,Wishlist_items,Wallet,Transaction
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
-from .forms import addaddressform,editaddressform
+from .forms import addaddressform,editaddressform,edituserform
 from django.contrib import messages
 from orders.models import Order,Order_item
 from django.utils import timezone
@@ -80,6 +80,7 @@ def product_detail(request,pk):
        
         return render(request,'product-page.html',{'product':product,'related_products':related_products,'discounted_price': discounted_price,'product_in_wishlist': product_in_wishlist})
     return redirect(user_login)
+
 
 
 
@@ -237,6 +238,7 @@ def update_cart(request, pk):
 
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
             total_price = sum(item.get_total() for item in Cart_items.objects.filter(cart=cart_item.cart))
+            
             return JsonResponse({'message': 'Item updated', 'cart_total': total_price, 'item_quantity': quantity})
     return JsonResponse({'message': 'Invalid request'})
 
@@ -249,12 +251,42 @@ def user_profile(request,pk):
             user = get_object_or_404(User,id = pk)
             address = User_address.objects.filter(customers_id=user.id)
             orders =  Order.objects.filter(user_id = pk).order_by('-created_at')
+            wallet = get_object_or_404(Wallet, user=user)
+            transactions = Transaction.objects.filter(wallet=wallet).order_by('-Transaction_date')
             # print(orders)
             
-            return render(request,'user_profile.html',{'user':user,'address':address,'orders': orders })
+            return render(request,'user_profile.html',{'user':user,'address':address,'orders': orders,'wallet':wallet,'transactions':transactions })
         except User.DoesNotExist:
             return redirect(user_login)
     return redirect(user_login)
+
+
+def edit_user(request,pk):
+    if 'user' in request.session:
+        username = request.session['user']
+
+        user = get_object_or_404(User,username=username)
+
+        if request.method == 'POST':
+            edituser = edituserform(request.POST,instance=user)
+
+            if edituser.is_valid():
+                
+                edituser.save()
+
+                return redirect(user_profile,pk=user.id)
+            else:
+                print('user edit form not valid ')
+                return render(request,'edituser.html',{'form' : edituser})
+        edituser = edituserform(instance = user)    
+        return render(request, 'edituser.html',{'form': edituser})
+    return redirect(user_login)
+
+
+                
+
+
+        
 
 
 def add_address(request):
@@ -395,11 +427,19 @@ def all_products(request):
 
     active_category = Category.objects.filter(soft_delete = False)
     products = Product.objects.filter(category__in = active_category,soft_delete = False)
+    search = request.GET.get('search','')
     sort_by = request.GET.get('sort','name')
     filter_by = request.GET.get('filter')
     # print(products)
     print(filter_by)
     print('sort')
+    print(search, 'search')
+    if search:
+        products = Product.objects.filter(Product_name__icontains = search )
+        # print(products)
+
+
+
 #  filter 
     if filter_by:
         print('f')
@@ -484,6 +524,25 @@ def remove_wishlist(request,pk):
 
 
 
-        
+def add_funds(request):
+    user = request.user
+    wallet = get_object_or_404(Wallet, user=user)
+    
+    if request.method == 'POST':
+        amount = request.POST.get('amount')
+        if amount:
+            amount = Decimal(amount)
+
+            wallet.amount += amount
+            wallet.save()
+            Transaction.objects.create(wallet=wallet, amount=amount, transaction_type='credit')
+            messages.success(request, f'Successfully added ${amount} to your wallet.')
+            return redirect(user_profile,pk = user.id)
+    
+    return render(request, 'add_funds.html', {'wallet': wallet})
+
+
+
+
 
         

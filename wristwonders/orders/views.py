@@ -1,18 +1,19 @@
 from django.shortcuts import render,get_object_or_404,redirect
-from Customers.models import User,User_address
+from Customers.models import User,User_address,Wallet,Transaction
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from Customers.models import Cart,Cart_items
 from Customers.views import Checkout,user_profile
 from authentication.views import user_login
 from django.utils import timezone
-from .models import Order,Order_item
+from .models import Order,Order_item,Order_cancellation
 from adminn.models import Coupon
 from decimal import Decimal
 from django.views.decorators.csrf import csrf_exempt
 import razorpay
 from django.conf import settings
 from django.http import HttpResponseBadRequest
+from orders.forms import OrderCancellationForm
 
 
 from django.http import HttpResponse
@@ -53,26 +54,39 @@ def Order_success(request):
         
         total_price = 0
         order_items = []
+        
 
         for item in cart_items: 
             product = item.product
             category_offer = Category_offer.objects.filter(category=item.product.category,
                                                             start_date__lte=timezone.now(),
                                                             end_date__gte=timezone.now()).first()
+            
+            print(category_offer)
                                 
                 
             product_offer=ProductOffer.objects.filter(product=item.product,start_date__lte=timezone.now(),end_date__gte=timezone.now()).first()
-                
-            if category_offer:
-                category_product_price = Decimal(item.product.price) - (Decimal(item.product.price) * category_offer.discount_percentage / Decimal('100'))
-            if product_offer:
-                product_product_price=Decimal(item.product.price)-Decimal(product_offer.discount_price)
             
-            if category_offer and product_offer:
-                if category_product_price < product_product_price:
-                    product_price = category_product_price
-                else:
+                
+            if category_offer is not None:
+                category_product_price = Decimal(item.product.price) - (Decimal(item.product.price) * category_offer.discount_percentage / Decimal('100'))
+                print((Decimal(item.product.price) * category_offer.discount_percentage / Decimal('100')),'categgory offer of the product')
+                print(category_product_price)
+
+            if product_offer is not None:
+                product_product_price=Decimal(item.product.price)-Decimal(product_offer.discount_price)
+                print(product_product_price)
+            
+            if category_offer is not None and product_offer is not None:
+                print('inside both offers')
+                print(category_product_price)
+                print(product_product_price)
+                if category_product_price > product_product_price:
+                    print(product_product_price)
                     product_price = product_product_price
+                else:
+                    print(category_product_price)
+                    product_price = category_product_price
             elif category_offer:
                 product_price=category_product_price
             elif product_offer:
@@ -100,6 +114,7 @@ def Order_success(request):
                 if total_price >= Decimal(coupon.min_purchase_amount):
                     
                     total_price -= coupon.discount
+                    
                 else:
                     return HttpResponse("Error: Minimum purchase amount for the coupon is not met")
             except Coupon.DoesNotExist:
@@ -140,6 +155,19 @@ def Order_success(request):
             request.session['total_price'] = str(total_price)
             request.session['order_id'] = order.id
             return redirect(paymenthomepage)
+        if payment == 'wallet':
+            wallet = get_object_or_404(Wallet,user = user)
+            transaction = Transaction.objects.filter(wallet = wallet)
+            if wallet.amount > total_price:
+                wallet.amount -= total_price
+                wallet.save()
+                order.payment_status = 'paid'
+                order.save()
+                
+                Transaction.objects.create(wallet=wallet, amount=total_price, transaction_type='debit')
+            else:
+                return HttpResponse('Error : insufficient fund in wallet')
+            
         return render(request, 'order-success.html')
     
     return redirect(Checkout)
@@ -147,20 +175,47 @@ def Order_success(request):
 
 def ordercancel(request,pk):
     if 'user' in request.session:
+        print('user')
         username = request.session['user']
         user = User.objects.get(username  = username)
 
         order = Order.objects.get(id = pk)
         orderitem = Order_item.objects.filter(order_id = order.id)
 
-        for item in orderitem:
-            item.Product.stock +=item.quantity
-            item.Product.save()
-        
-        order.is_cancelled = True
-        order.save()
+        if request.method == 'POST':
+            print('reason post')
+            form = OrderCancellationForm(request.POST)
 
-        return redirect(user_profile,pk = user.id)
+            if form.is_valid():
+
+                for item in orderitem:
+                    item.Product.stock +=item.quantity
+                    item.Product.save()
+        
+                order.is_cancelled = True
+            
+                order.save()
+                if order.payment_status == 'paid':
+                    wallet = get_object_or_404(Wallet,user = user)
+                    transaction = Transaction.objects.filter(wallet = wallet)
+                    wallet.amount += order.total_price
+                    wallet.save()
+                    order.payment_status = 'refunded to your wallet'
+                    order.save()
+
+                    Transaction.objects.create(wallet=wallet, amount=order.total_price, transaction_type='credit')
+
+                
+                Order_cancellation.objects.create(
+                    order=order,
+                    reason=form.cleaned_data['reason']
+                )
+
+                return redirect(user_profile,pk = user.id)
+        else:
+            form = OrderCancellationForm()
+            return render(request, 'order_cancel.html', {'order': order,'form': form})
+        
     return redirect(user_login)
 
 
@@ -275,6 +330,7 @@ def paymenthandler(request):
 
 
 def order_pdf_view(request,pk):
+
     print('pdf')
 
     if 'user' in request.session:
@@ -301,3 +357,5 @@ def order_pdf_view(request,pk):
             return HttpResponse('We had some errors <pre>' + html + '</pre>')
         return response
     return redirect(user_login)
+
+

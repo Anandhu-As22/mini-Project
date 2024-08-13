@@ -1,45 +1,76 @@
 {% extends 'admin-sidebar.html' %}
 {% block content %}
 
-
 <div class="container mt-4" style="max-width: 600px;">
-    <h1 class="mb-4 text-center" style="font-family: 'Arial', sans-serif;
-    color: #333;">Add New Product</h1>
-    <div class="card shadow-sm p-4"style="border-radius:10px">
+    <h1 class="mb-4 text-center" style="font-family: 'Arial', sans-serif; color: #333;">Update Product</h1>
+    <div class="card shadow-sm p-4" style="border-radius: 10px;">
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="form-group">
                 {{ productform.as_p }}
             </div>
 
-            <input type="file" id="files" name="images" multiple>
-            
-            
+            <div class="form-group">
+                <label for="formset">Product Images:</label>
+                {{ formset.management_form }}
+                <div class="row">
+                    {% for form in formset %}
+                        <div class="col-md-4">
+                            {% if form.instance.image %}
+                                <img src="{{ form.instance.image.url }}" class="img-thumbnail clickable-image" alt="Product Image" style="max-width: 100%;" data-toggle="modal" data-target="#imageModal" data-src="{{ form.instance.image.url }}">
+                            {% endif %}
+                             {{ form.as_p }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
             <button type="submit" class="btn btn-primary btn-block">Update Product</button>
         </form>
     </div>
 </div>
-{% endblock %}
 
+<!-- Modal for Image Popup -->
+<div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" >
+        <div class="modal-content">
+            <div class="modal-header">
+              
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#imageModal').modal('hide');">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImage" src="" alt="Product Image" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</div>
 
-{% block extra_js %}
+<!-- Include jQuery -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<!-- Include Popper.js -->
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<!-- Include Bootstrap JS -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 <script>
-    (function() {
-        'use strict';
-        window.addEventListener('load', function() {
-            var forms = document.getElementsByClassName('needs-validation');
-            var validation = Array.prototype.filter.call(forms, function(form) {
-                form.addEventListener('submit', function(event) {
-                    if (form.checkValidity() === false) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-                    form.classList.add('was-validated');
-                }, false);
+    document.addEventListener('DOMContentLoaded', function () {
+        // Get all clickable images
+        var clickableImages = document.querySelectorAll('.clickable-image');
+
+        // Add click event listener to each image
+        clickableImages.forEach(function (img) {
+            img.addEventListener('click', function () {
+                // Get the image URL from the data-src attribute
+                var imgSrc = this.getAttribute('data-src');
+
+                // Set the image source in the modal
+                var modalImage = document.getElementById('modalImage');
+                modalImage.setAttribute('src', imgSrc);
             });
-        }, false);
-    })();
+        });
+    });
 </script>
+
 {% endblock %}
-
-

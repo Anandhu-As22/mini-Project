@@ -31,6 +31,8 @@ class Product(models.Model):
     price = models.FloatField()
     soft_delete = models.BooleanField(default=False)
     stock = models.PositiveIntegerField()
+    last_update = models.DateTimeField(auto_now_add=True)
+    
 
 
     def __str__(self) -> str:

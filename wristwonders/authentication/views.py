@@ -7,7 +7,7 @@ from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
 from django.urls import reverse
 from django .template.loader import render_to_string
-from Customers.models import User
+from Customers.models import User,Wallet,Wishlist
 import time
 # Create your views here.
 
@@ -146,7 +146,10 @@ def otp_verification(request):
 
             if entered_otp == otp:
             
-                User.objects.create(email = email,username = username,first_name=first_name,last_name=last_name,password=password)
+                user = User.objects.create(email = email,username = username,first_name=first_name,last_name=last_name,password=password)
+                Wallet.objects.create(user=user)
+                Wishlist.objects.create(user=user)
+
                 del request.session['otp']
                 del request.session['username']
                 del request.session['email']

@@ -1,7 +1,7 @@
 from django import forms
 from django.db import models
 from django.forms import ModelForm
-from .models import User_address
+from .models import User_address,User
 
 class addaddressform(forms.ModelForm):
     class Meta:
@@ -31,3 +31,13 @@ class editaddressform(ModelForm):
             'phone_no': forms.TextInput(attrs={'placeholder': 'Enter phone number','class':'form-control'}),
         }
         
+class edituserform(ModelForm):
+    class Meta:
+        model = User
+        fields = ['username','first_name','last_name','email']
+        widgets ={
+            'username' : forms.TextInput(attrs={'placeholder':'username','class':'form-control'}),
+            'first_name' : forms.TextInput(attrs={'placeholder':'first_name','class':'form-control'}),
+            'last_name' : forms.TextInput(attrs={'placeholder':'last_name','class':'form-control'}),
+            'email' : forms.EmailInput(attrs={'placeholder':'email','class':'form-control'})
+        }

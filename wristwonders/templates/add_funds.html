@@ -1,0 +1,21 @@
+{% extends 'nav.html' %}
+
+{% block type %}
+{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-body">
+            <h4>Add Funds to Wallet</h4>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="amount">Amount:</label>
+                    <input type="number" class="form-control" id="amount" name="amount" step="0.01" required>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">Add Funds</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

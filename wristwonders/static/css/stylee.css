@@ -1,0 +1,77 @@
+/* CSS for Admin Panel */
+.sidebar {
+    width: 250px;
+
+    height: 100vh;
+    overflow: hidden;
+    padding: 20px;
+    background-color: #343a40;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    z-index: 1000; /* Ensure sidebar is always on top */
+}
+
+.content-area {
+    margin-left: 250px; /* Same as sidebar width */
+    padding: 20px;
+    overflow-y: auto;
+    height: 100vh;
+}
+
+.sticky-sidebar {
+    position: sticky;
+    top: 0;
+}
+
+.nav-link {
+    color: #ddd;
+}
+
+.nav-link:hover, .nav-link:focus {
+    color: #fff;
+}
+
+.nav-link.active {
+    color: #fff;
+    background-color: #495057;
+}
+
+.dropdown-toggle::after {
+    display: none;
+}
+
+.btn-light {
+    margin-top: 20px;
+    color: #343a40;
+    background-color: #f8f9fa;
+}
+
+.btn-light:hover {
+    color: #343a40;
+    background-color: #e2e6ea;
+}
+
+.single-product-item {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    transition: transform 0.2s ease;
+}
+
+.single-product-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.product-text h6 {
+    font-size: 16px;
+    margin-top: 10px;
+    color: #333;
+}
+
+.product-text p {
+    font-size: 14px;
+    color: #555;
+}
