@@ -231,6 +231,32 @@
                                 <!-- Additional orders can be added here -->
                             </tbody>
                         </table>
+                        <!-- pagination of orders -->
+                        <nav aria-label="...">
+                            <ul class="pagination">
+                                {% if orders.has_previous %}
+                                <li class="page-item ">
+                                    <a class="page-link" href="?page={{orders.previous_page_number}}" tabindex="-1" aria-disabled="true">Previous</a>
+                                </li>
+                                {% endif %}
+                                {% for i in orders.paginator.page_range %}
+                                    {% if orders.number == i %}
+                                    <li class="page-item active" aria-current="page">
+                                        <a class="page-link" href="#">{{i}}</a>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item"><a class="page-link" href="?page={{i}}">{{i}}</a></li>
+                                    {% endif %}
+                                {% endfor %}
+                              
+                             
+                              {% if orders.has_next %}
+                              <li class="page-item ">
+                                <a class="page-link" href="?page={{orders.next_page_number}}" tabindex="-1" aria-disabled="true">Next</a>
+                            </li>
+                              {% endif %}
+                            </ul>
+                          </nav>
                         
                     </div>
                 </div>
@@ -273,6 +299,31 @@
                                 {% endfor %}
                             </tbody>
                         </table>
+                        <nav aria-label="...">
+                            <ul class="pagination">
+                                {% if transactions.has_previous %}
+                                <li class="page-item ">
+                                    <a class="page-link" href="?page={{transactions.previous_page_number}}" tabindex="-1" aria-disabled="true">Previous</a>
+                                </li>
+                                {% endif %}
+                                {% for i in transactions.paginator.page_range %}
+                                    {% if transactions.number == i %}
+                                        <li class="page-item active" aria-current="page">
+                                            <a class="page-link" href="#">{{i}}</a>
+                                        </li>
+                                    {% else %}
+                                      
+                                        <li class="page-item"><a class="page-link" href="?page={{i}}">{{i}}</a></li>
+                                    {% endif %}
+                                {% endfor %}
+                              
+                                {% if transactions.has_next %}
+                                <li class="page-item ">
+                                    <a class="page-link" href="?page={{transactions.next_page_number}}" tabindex="-1" aria-disabled="true">Next</a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                          </nav>
                     </div>
                 </div>
                 <div class="tab-pane fade" id="pills-settings" role="tabpanel" aria-labelledby="pills-settings-tab">

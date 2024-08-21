@@ -50,6 +50,9 @@
                         </tbody>
                     </table>
                     <div class="text-right">
+                        {% if order.coupon %}
+                            <p>coupon discount :{{ order.coupon.discount}} </p>
+                        {% endif %}
                         <h4>Total Order Price: $ {{ order.total_price }}</h4>
                     </div>
                 </div>

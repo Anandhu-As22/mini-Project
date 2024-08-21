@@ -108,6 +108,7 @@ def Add_product(request):
     if 'adminn' in request.session:
         if request.method == 'POST':
             product_form = Product_Form(request.POST)
+            
             images = request.FILES.getlist('images')
             for image in images:
                 print("hiii")
@@ -138,7 +139,12 @@ def Add_product(request):
 
                 if price >= 0 and quantity >=0:
                     product = product_form.save()
-                
+                    # varients = formset.save(commit=False)
+
+                    # for varient in varients:
+                    #     varient.product =product
+                    #     varient.save()
+
                     for img in images:
                         print(img)
                         
@@ -147,6 +153,8 @@ def Add_product(request):
                 
         else:
             product_form = Product_Form()
+
+           
             
         return render(request, 'add-product.html', {'product_form': product_form})
     return redirect(admin_login)
@@ -156,9 +164,9 @@ def Add_product(request):
 
 
 
-def view_image(request,pk):
-    if 'adminn' in request.session:
-        product = get_object_or_404(Product,pk = pk)
+# def view_image(request,pk):
+#     if 'adminn' in request.session:
+#         product = get_object_or_404(Product,pk = pk)
         
 
 def update_product(request, pk):

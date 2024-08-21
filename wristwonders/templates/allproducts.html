@@ -48,40 +48,65 @@
     </div>
   </div> -->
 
-<div class="container">
-  
-  <div class="row m-5" >
-          <form method="GET" class="form-inline justify-content-center mb-4" id="filter-sort-form">
-            <div class="form-group mx-2">
-              <label for="search" class="mr-2">Search:</label>
-              <input type="text" id="search" name="search" class="form-control" 
-                     value="{{ request.GET.search }}" 
-                     placeholder="Type your query here...">
-              <button type="submit" class="btn btn-primary ml-2">Search</button>
-            </div>
-            <div class="form-group mx-2">
-                <label for="filter" class="mr-2">Filter by Category:</label>
-                <select name="filter" id="filter" class="form-control" style="background-color: #B0BCC2;" onchange="document.getElementById('filter-sort-form').submit();">
-                    <option value="">All</option>
-                    {% for category in category %}
-                        <option value="{{ category.category_name }}" {% if request.GET.filter == category.category_name %}selected{% endif %}>
-                            {{ category.category_name }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group mx-2">
-                <label for="sort" class="mr-2">Sort by:</label>
-                <select name="sort" id="sort" class="form-control" style="background-color: #B0BCC2;" onchange="document.getElementById('filter-sort-form').submit();">
-                    <option value="name" {% if request.GET.sort == 'name' %}selected{% endif %}>Name (A-Z)</option>
-                    <option value="aA-zZ" {% if request.GET.sort == 'aA-zZ' %}selected{% endif %}>Name (A-Z)</option>
-                    <option value="zZ-aA" {% if request.GET.sort == 'zZ-aA' %}selected{% endif %}>Name (Z-A)</option>
-                    <option value="low-high" {% if request.GET.sort == 'low-high' %}selected{% endif %}>Price (Low to High)</option>
-                    <option value="high-low" {% if request.GET.sort == 'high-low' %}selected{% endif %}>Price (High to Low)</option>
-                </select>
-            </div>
-        </form>
-  </div>      
+  <div class="container mt-5">
+    <!-- Search Container -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-lg-8">
+            <form method="GET" id="search-form" class="p-3 rounded shadow-sm bg-white">
+                <div class="input-group">
+                    <label for="search" class="input-group-text bg-primary text-white border-0">Search</label>
+                    <input type="text" id="search" name="search" class="form-control border-end-0" 
+                           value="{{ request.GET.search }}" 
+                           placeholder="Type your query here...">
+                    <button type="submit" class="btn btn-primary input-group-text border-start-0">Go</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Filters and Sort Container -->
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <form method="GET" id="filter-sort-form" class="p-3 rounded shadow-sm bg-white d-flex align-items-center justify-content-between">
+                <!-- Category Filter -->
+                <div class="form-group mb-0">
+                    <label for="filter_by_category" class="form-label font-weight-bold text-secondary">Category</label>
+                    <select name="filter_by_category" id="filter_by_category" class="form-select" onchange="document.getElementById('filter-sort-form').submit();">
+                        <option value="">All Categories</option>
+                        {% for category in category %}
+                            <option value="{{ category.category_name }}" {% if request.GET.filter_by_category == category.category_name %}selected{% endif %}>
+                                {{ category.category_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Brand Filter -->
+                <div class="form-group mb-0">
+                    <label for="filter_by_brand" class="form-label font-weight-bold text-secondary">Brand</label>
+                    <select name="filter_by_brand" id="filter_by_brand" class="form-select" onchange="document.getElementById('filter-sort-form').submit();">
+                        <option value="">All Brands</option>
+                        {% for brand in brand %}
+                            <option value="{{ brand.name }}" {% if request.GET.filter_by_brand == brand.name %}selected{% endif %}>
+                                {{ brand.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Sort Options -->
+                <div class="form-group mb-0">
+                    <label for="sort" class="form-label font-weight-bold text-secondary">Sort by</label>
+                    <select name="sort" id="sort" class="form-select" onchange="document.getElementById('filter-sort-form').submit();">
+                        <option value="name" {% if request.GET.sort == 'name' %}selected{% endif %}>Name (A-Z)</option>
+                        <option value="zZ-aA" {% if request.GET.sort == 'zZ-aA' %}selected{% endif %}>Name (Z-A)</option>
+                        <option value="low-high" {% if request.GET.sort == 'low-high' %}selected{% endif %}>Price (Low to High)</option>
+                        <option value="high-low" {% if request.GET.sort == 'high-low' %}selected{% endif %}>Price (High to Low)</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 
@@ -112,4 +137,32 @@
     </div>
 </section>
 
+<!-- pagination -->
+
+<nav aria-label="...">
+  
+  <ul class="pagination">
+    {% if products.has_previous %}
+    <li class="page-item ">
+      <a class="page-link" href="?page={{products.previous_page_number}}" tabindex="-1" aria-disabled="true">Previous</a>
+    </li>
+    {% endif %}
+    {% for i in products.paginator.page_range %}
+      {% if product.number == i %}
+      <li class="page-item active" aria-current="page">
+        <a class="page-link" href="#">{{i}}</a>
+      </li>
+      {% else %}
+        <li class="page-item"><a class="page-link" href="?page={{i}}">{{i}}</a></li>
+        
+      {% endif %}
+    {% endfor %}
+   
+    {% if products.has_next %}
+    <li class="page-item ">
+      <a class="page-link" href="?page={{products.next_page_number}}" tabindex="-1" aria-disabled="true">Next</a>
+    </li>
+    {% endif %}
+  </ul>
+</nav>
 {% endblock %}

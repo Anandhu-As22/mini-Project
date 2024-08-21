@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from authentication.views import user_login
-from Product.models import Category,Product,Category_offer,ProductOffer
+from Product.models import Category,Product,Category_offer,ProductOffer,Brand
 from .models import User,Cart,Cart_items,User_address,Wishlist,Wishlist_items,Wallet,Transaction
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
@@ -9,6 +9,8 @@ from django.contrib import messages
 from orders.models import Order,Order_item
 from django.utils import timezone
 from decimal import Decimal
+
+from django.core.paginator import Paginator
 
 # Create your views here.
 
@@ -27,6 +29,12 @@ def index_page(request):
 
 def Home_page(request):
     if request.user.is_authenticated:
+        request.session['user'] = request.user.username
+        try:
+            wallet , created= Wallet.objects.get_or_create(user= request.user)
+            wishlist ,created= Wishlist.objects.get_or_create(user=request.user)
+        except:
+            pass
         category = Category.objects.all().exclude(soft_delete = True),
         products = Product.objects.all().exclude(soft_delete = True)
 
@@ -254,6 +262,14 @@ def user_profile(request,pk):
             wallet = get_object_or_404(Wallet, user=user)
             transactions = Transaction.objects.filter(wallet=wallet).order_by('-Transaction_date')
             # print(orders)
+
+            paginator = Paginator(orders,10)
+            page_number  = request.GET.get('page',1)
+            orders = paginator.get_page(page_number)
+
+            paginator1 = Paginator(transactions,5)
+            page = request.GET.get('page',1)
+            transactions = paginator1.get_page(page)
             
             return render(request,'user_profile.html',{'user':user,'address':address,'orders': orders,'wallet':wallet,'transactions':transactions })
         except User.DoesNotExist:
@@ -427,11 +443,13 @@ def all_products(request):
 
     active_category = Category.objects.filter(soft_delete = False)
     products = Product.objects.filter(category__in = active_category,soft_delete = False)
+    brand = Brand.objects.all()
     search = request.GET.get('search','')
     sort_by = request.GET.get('sort','name')
-    filter_by = request.GET.get('filter')
+    filter_by_category = request.GET.get('filter_by_category')
+    filter_by_brand =request.GET.get('filter_by_brand')
     # print(products)
-    print(filter_by)
+    
     print('sort')
     print(search, 'search')
     if search:
@@ -441,9 +459,15 @@ def all_products(request):
 
 
 #  filter 
-    if filter_by:
-        print('f')
-        products = products.filter(category__category_name = filter_by)
+    
+        
+    if filter_by_category:
+
+        products = products.filter(category__category_name = filter_by_category)
+
+    if filter_by_brand:
+        products = products.filter(brand__name=filter_by_brand) 
+    
     #  sorting
     if sort_by== 'aA-zZ':
         print('n')
@@ -460,8 +484,10 @@ def all_products(request):
     else:
        products = products
     
-
-    return render(request,'allproducts.html',{'products':products,'category':active_category})
+    paginator =  Paginator(products,8)
+    page_number = request.GET.get('page',1)
+    products = paginator.get_page(page_number)
+    return render(request,'allproducts.html',{'products':products,'category':active_category,'brand':brand})
 
 
 

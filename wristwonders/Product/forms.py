@@ -1,6 +1,6 @@
 from django.db import models
 from django.forms import fields,ModelForm,inlineformset_factory
-from .models import Category,Product,product_image
+from .models import Category,Product,product_image,Brand
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
@@ -62,16 +62,20 @@ class Product_Form(ModelForm):
             'category': forms.Select(attrs={'class': 'form-control'}),  # Ensure the field name matches the model
             'image': forms.ClearableFileInput(attrs={'class': 'form-control-file'}),
             'stock': forms.NumberInput(attrs={'class': 'form-control'}),
+            'brand':forms.Select(attrs={'class':'form-control'})
         }
 
-
-# class Product_Image_Form(forms.ModelForm):
+# class ProductVariant_Form(ModelForm):
 #     class Meta:
-        
-#         model = product_image
-#         fields = ['image']
+#         model = ProductVarient
+#         fields = ['colour', 'image']
+#         widgets = {
+#             'colour': forms.TextInput(attrs={'class': 'form-control'}),
+#             'image': forms.ClearableFileInput(attrs={'class': 'form-control-file'}),
+#         }
 
-ProductImageFormSet = inlineformset_factory(Product, product_image, fields=['image'], extra=1,can_delete=True)
+# ProductVariantFormSet = inlineformset_factory(Product, ProductVarient, form=ProductVariant_Form, extra=1,can_delete=True)
+ProductImageFormSet = inlineformset_factory(Product, product_image, fields=['image'], extra=3,can_delete=True)
 
 
 
@@ -85,4 +89,15 @@ class Product_edit_form(forms.ModelForm):
             'price': forms.NumberInput(attrs={'class': 'form-control'}),
             'category': forms.Select(attrs={'class': 'form-control'}),  # Ensure the field name matches the model
             'stock': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+class Brand(forms.ModelForm):
+    class Meta:
+        model = Brand
+        fields = '__all__'
+        widgets = {
+            'name': forms.TextInput(attrs={'class':'form-control',
+                                           'placeholder': 'Enter brand name',
+                'style': 'width: 100%; border: 2px solid #343A40; border-radius: 5px;',
+                                           
+                                           }),
         }

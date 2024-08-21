@@ -111,9 +111,9 @@ def Order_success(request):
             
             try:
                 coupon = Coupon.objects.get(coupon_code=coupon, is_active=True)
-                if total_price >= Decimal(coupon.min_purchase_amount):
+                if total_price >= coupon.min_purchase_amount:
                     
-                    total_price -= coupon.discount
+                    total_price -= float(coupon.discount)
                     
                 else:
                     return HttpResponse("Error: Minimum purchase amount for the coupon is not met")
@@ -135,8 +135,9 @@ def Order_success(request):
             state=address.state,
             pincode=address.pincode,
             payment=payment,
-            payment_status='Pending'
-        )
+            payment_status='Pending',
+            coupon=coupon if coupon else None 
+        ) 
     
         for product, quantity, price in order_items:
             Order_item.objects.create(
@@ -217,6 +218,9 @@ def ordercancel(request,pk):
             return render(request, 'order_cancel.html', {'order': order,'form': form})
         
     return redirect(user_login)
+
+
+
 
 
     
@@ -341,7 +345,7 @@ def order_pdf_view(request,pk):
         total_order_price = sum(item.price for item in order_items)
 
         template_path = 'orderdetailpdf.html'
-        context = {'order':order,'order_items':order_items,'total_order_price':total_order_price,'user':user}
+        context = {'order':order,'order_items':order_items,'total_order_price':total_order_price,'user':user,'coupon':order.coupon}
         # Create a Django response object, and specify content_type as pdf
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename="report.pdf"'

@@ -103,6 +103,15 @@
             </tbody>
         </table>
         <div class="text-right m-3">
+            {% if order.coupon %}
+                <tr>
+                  
+                  <td colspan="3">
+                  </td><td class="text-right"><strong>Coupon :</strong></td>
+                  
+                  <td class="text-right"><strong>-${{order.coupon.discount}}</strong></td>
+                </tr>
+                {% endif %}
             <h4>Total Order Price: $ {{ order.total_price }}</h4>
         </div>
 

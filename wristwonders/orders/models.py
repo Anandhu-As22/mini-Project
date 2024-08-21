@@ -2,6 +2,7 @@ from django.db import models
 from Customers.models import User,User_address
 from Product.models import Product
 from django.utils import timezone
+from adminn.models import Coupon
 
 # Create your models here.
 
@@ -40,7 +41,8 @@ class Order(models.Model):
     payment_status=models.CharField(max_length=100,choices=PAYMENT_STATUS_CHOICES,default="Pending")
     is_return=models.BooleanField(default=False)
     return_status=models.CharField(max_length=100,choices=RETURN_STATUS_CHOICES,default='none')
-    is_cancelled=models.BooleanField(default=False)
+    is_cancelled=models.BooleanField(default=False) 
+    coupon = models.ForeignKey(Coupon,on_delete=models.SET_NULL,null=True,blank=True)
 
 
 

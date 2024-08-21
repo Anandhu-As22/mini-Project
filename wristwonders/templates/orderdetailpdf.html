@@ -71,12 +71,13 @@
                   
                 </tr>
                 {% endfor %}
-                {% if order.coupon %}
+                {% if coupon %}
                 <tr>
+                  
                   <td colspan="3">
                   </td><td class="text-right"><strong>Coupon</strong></td>
                   
-                  <td class="text-right"><strong>${{order.coupon.discount}}</strong></td>
+                  <td class="text-right"><strong>${{coupon.discount}}</strong></td>
                 </tr>
                 {% endif %}
                 <tr>
