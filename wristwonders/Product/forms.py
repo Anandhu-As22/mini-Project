@@ -55,14 +55,18 @@ class Product_Form(ModelForm):
     class Meta:
         model = Product
         fields = '__all__'
+        exclude = ['soft_delete']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control'}),
             'price': forms.NumberInput(attrs={'class': 'form-control'}),
-            'category': forms.Select(attrs={'class': 'form-control'}),  # Ensure the field name matches the model
+            'category': forms.Select(attrs={'class': 'form-control'}), 
             'image': forms.ClearableFileInput(attrs={'class': 'form-control-file'}),
             'stock': forms.NumberInput(attrs={'class': 'form-control'}),
-            'brand':forms.Select(attrs={'class':'form-control'})
+            'brand':forms.Select(attrs={'class':'form-control'}),
+            'colour':forms.TextInput(attrs={'class':'form-control'}),
+            'parent_product': forms.Select(attrs={'class': 'form-control'}), 
+
         }
 
 # class ProductVariant_Form(ModelForm):
@@ -75,20 +79,23 @@ class Product_Form(ModelForm):
 #         }
 
 # ProductVariantFormSet = inlineformset_factory(Product, ProductVarient, form=ProductVariant_Form, extra=1,can_delete=True)
-ProductImageFormSet = inlineformset_factory(Product, product_image, fields=['image'], extra=3,can_delete=True)
+ProductImageFormSet = inlineformset_factory(Product, product_image, fields=['image'], extra=1,can_delete=True)
 
 
 
 class Product_edit_form(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ['Product_name','description','price','category','stock']
+        fields = ['Product_name','description','price','category','stock','brand','colour','parent_product']
         widgets = {
             'Product_name': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control'}),
             'price': forms.NumberInput(attrs={'class': 'form-control'}),
             'category': forms.Select(attrs={'class': 'form-control'}),  # Ensure the field name matches the model
             'stock': forms.NumberInput(attrs={'class': 'form-control'}),
+            'brand':forms.Select(attrs={'class':'form-control'}),
+            'colour':forms.TextInput(attrs={'class':'form-control'}),
+            'parent_product': forms.Select(attrs={'class': 'form-control'}), 
         }
 class Brand(forms.ModelForm):
     class Meta:

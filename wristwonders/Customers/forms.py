@@ -2,6 +2,7 @@ from django import forms
 from django.db import models
 from django.forms import ModelForm
 from .models import User_address,User
+from django.core.exceptions import ValidationError
 
 class addaddressform(forms.ModelForm):
     class Meta:
@@ -16,6 +17,14 @@ class addaddressform(forms.ModelForm):
             'pincode': forms.TextInput(attrs={'placeholder': 'Enter pincode','class':'form-control'}),
             'phone_no': forms.TextInput(attrs={'placeholder': 'Enter phone number','class':'form-control'}),
         }
+    def clean_pincode(self):
+        pincode = self.cleaned_data.get('pincode')
+        if not pincode.isdigit():
+            raise forms.ValidationError('pincode must only contains digits')
+        if len(pincode) !=6 :
+            raise forms.ValidationError('pincode must contains 6 digits')
+        return pincode
+
 
 class editaddressform(ModelForm):
     class Meta:
@@ -31,6 +40,14 @@ class editaddressform(ModelForm):
             'phone_no': forms.TextInput(attrs={'placeholder': 'Enter phone number','class':'form-control'}),
         }
         
+    def clean_pincode(self):
+        pincode = self.cleaned_data.get('pincode')
+        if not pincode.isdigit():
+            raise forms.ValidationError('pincode must only contains digits')
+        if len(pincode) !=6 :
+            raise forms.ValidationError('pincode must contains 6 digits')
+        return pincode
+
 class edituserform(ModelForm):
     class Meta:
         model = User

@@ -70,6 +70,31 @@
                 {% endfor %}
             </tbody>
         </table>
+        <nav aria-label="...">
+            <ul class="pagination">
+                {% if orders.has_previous %}
+                <li class="page-item ">
+                    <a class="page-link" href="?page={{orders.previous_page_number}}" tabindex="-1" aria-disabled="true">Previous</a>
+                </li>
+                {% endif %}
+                {% for i in orders.paginator.page_range %}
+                    {% if orders.number == i %}
+                    <li class="page-item active" aria-current="page">
+                        <a class="page-link" href="#">{{i}}</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item"><a class="page-link" href="?page={{i}}">{{i}}</a></li>
+                    {% endif %}
+                {% endfor %}
+              
+             
+              {% if orders.has_next %}
+              <li class="page-item ">
+                <a class="page-link" href="?page={{orders.next_page_number}}" tabindex="-1" aria-disabled="true">Next</a>
+            </li>
+              {% endif %}
+            </ul>
+          </nav>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>

@@ -44,7 +44,7 @@ def user_login(request):
 
 
 # user sign up
-
+@never_cache
 def user_signup(request):
     if request.method == "POST":
         form = RegisterForm(request.POST)
@@ -125,7 +125,7 @@ def user_signup(request):
 
 
 # otp verification
-
+@never_cache
 def otp_verification(request):
     
     
@@ -158,7 +158,7 @@ def otp_verification(request):
                 del request.session['last_name']
                 del request.session['otp_send_time']
 
-                return redirect(user_login)  # Redirect to login page
+                return redirect(user_login) 
         
             else:
                 messages.error(request,'Invalid otp,please try again')
@@ -301,6 +301,8 @@ def forgot_password_verification(request):
 def user_logout(request):
     
     logout(request)
+    if 'user' in request.session:
+        del request.session['user']
     
     return redirect('index')
 
@@ -308,7 +310,7 @@ def user_logout(request):
 
 # admin login
 
-
+@never_cache
 def admin_login(request):
     if request.method =="POST":
         form = LoginForm(request.POST)
@@ -340,5 +342,4 @@ def adminn_logout(request):
     
     logout(request)
     return redirect(admin_login)
-
 

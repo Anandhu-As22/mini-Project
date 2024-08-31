@@ -1,20 +1,85 @@
 {% extends 'admin-sidebar.html' %}
 {% block content %}
 
-
     <style>
-        
+        /* Page-specific styles */
+        .container {
+            max-width: 100%;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #343a40;
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
+
         .coupon-table {
-            margin: 0 auto;
-            width: 80%;
+            margin-top: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .coupon-table thead {
+            background-color: #343a40;
+            color: white;
+        }
+
+        .coupon-table th, .coupon-table td {
+            vertical-align: middle;
+            text-align: center;
+            padding: 15px;
+        }
+
+        .coupon-table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .btn {
+            margin: 5px 0;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-dark {
+            background-color: #343a40;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+
+        .btn-dark:hover {
+            background-color: #495057;
+            color: white;
+        }
+
+        .btn-outline-info, .btn-outline-danger {
+            font-size: 14px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: color 0.3s ease, background-color 0.3s ease;
+        }
+
+        .btn-outline-info:hover {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .btn-outline-danger:hover {
+            background-color: #dc3545;
+            color: white;
         }
     </style>
 
-
     <div class="container">
-        <h1 class="text-center mb-4">Coupons</h1>
-        <div >
-            <a href="{% url 'addcoupon' %}" class="btn btn-dark">add coupon</a>
+        <h1 class="text-center mb-4">Manage Coupons</h1>
+        <div class="text-right mb-3">
+            <a href="{% url 'addcoupon' %}" class="btn btn-dark">Add Coupon</a>
         </div>
         <table class="table table-striped table-hover coupon-table">
             <thead class="thead-dark">
@@ -23,7 +88,7 @@
                     <th scope="col">Coupon Code</th>
                     <th scope="col">Coupon Name</th>
                     <th scope="col">Discount</th>
-                    <th scope="col">Min Purchase amount</th>
+                    <th scope="col">Min Purchase Amount</th>
                     <th scope="col">Is Active</th>
                     <th scope="col">Created At</th>
                     <th scope="col">Action</th>
@@ -53,7 +118,5 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-
 
 {% endblock %}

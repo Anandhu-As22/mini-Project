@@ -59,7 +59,9 @@ class Order_item(models.Model):
 class Order_cancellation(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='cancellations')
     reason = models.TextField()
+    cancel_status = models.CharField(max_length=10,choices=[('pending','Pending'),('approved','Approved'),('rejected','Rejected')],default='pending')
     cancelled_at = models.DateTimeField(default=timezone.now)
+    updated_at =  models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
         return f"Cancellation for Order {self.order.id} by {self.order.user.username}"

@@ -5,116 +5,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Admin Dashboard</title>
     
+    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" type="text/css">
     <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}" type="text/css">
-    <link rel="stylesheet" href="{% static 'css/nice-select.css' %}" type="text/css">
-    <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}" type="text/css">
-    <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}" type="text/css">
-    <link rel="stylesheet" href="{% static 'css/slicknav.min.css' %}" type="text/css">
-    <link rel="stylesheet" href="{% static 'css/stylee.css' %}" type="text/css">
-
-    <style>
-        body, html {
-            height: 100%;
-            margin: 0;
-            overflow: hidden;
-            
-        }
-        .container-fluid {
-            display: flex;
-            height: 100%;
-        }
-        .sidebar {
-            flex: 0 0 250px; /* Adjust the width as needed */
-            background-color: #343a40; /* bg-dark */
-            color: white;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        .content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-        }
-        .min-vh-100 {
-            height: 100vh !important;
-        }
-    </style>
 </head>
-<body>
-    <div class="container-fluid">
-        <div class="sidebar">
-            <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
-            
+<body style="margin: 0; background-color: #f8f9fa;">
+
+    <!-- Sidebar and Content -->
+    <div class="wrapper" style="display: flex; height: 100vh; overflow: hidden;">
+        
+        <!-- Sidebar -->
+        <nav style="position: fixed; top: 0; bottom: 0; width: 250px; background-color: #343a40; color: white; padding: 20px; box-sizing: border-box; overflow-y: auto;">
+            <div class="d-flex flex-column align-items-center align-items-sm-start text-white">
+                
+                <h3 class="text-center" style="margin-bottom: 30px;">Admin Panel</h3>
+                
                 <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
-                    <li class="nav-item">
-                        <a href="{% url 'admin-home' %}" class="nav-link align-middle px-0">
-                            <i class="fs-4 bi-house"></i> <span class="ms-1 d-none d-sm-inline">Home</span>
+                    <li class="nav-item" style="margin-bottom: 10px;">
+                        <a href="{% url 'admin-home' %}" class="nav-link align-middle px-0" style="color: #ffffff; font-size: 18px; padding: 10px 15px; border-radius: 5px;">
+                            <i class="fa fa-home"></i> 
+                            <span class="ms-1 d-none d-sm-inline">Home</span>
                         </a>
                     </li>
-                    <li>
-                        
+                    <li class="nav-item" style="margin-bottom: 10px;">
+                        <a href="#submenu1" data-toggle="collapse" class="nav-link px-0 align-middle" style="color: #ffffff; font-size: 18px; padding: 10px 15px; border-radius: 5px;">
+                            <i class="fa fa-list"></i> 
+                            <span class="ms-1 d-none d-sm-inline">Manage</span> 
+                        </a>
                         <ul class="collapse show nav flex-column ms-1" id="submenu1" data-bs-parent="#menu">
-                            <li class="w-100">
-                                <a href="{% url 'Category' %}" class="nav-link px-0"> <span class="d-none d-sm-inline">Category</span> </a>
+                            <li class="w-100" style="margin-bottom: 10px;">
+                                <a href="{% url 'Category' %}" class="nav-link px-0" style="color: #ffffff; font-size: 16px; padding: 8px 15px; border-radius: 5px;">
+                                    <span class="d-none d-sm-inline">Category</span> 
+                                </a>
                             </li>
-                            <li>
-                                <a href="{% url 'product-list' %}" class="nav-link px-0"> <span class="d-none d-sm-inline">Products</span> </a>
+                            <li class="w-100" style="margin-bottom: 10px;">
+                                <a href="{% url 'product-list' %}" class="nav-link px-0" style="color: #ffffff; font-size: 16px; padding: 8px 15px; border-radius: 5px;">
+                                    <span class="d-none d-sm-inline">Products</span> 
+                                </a>
                             </li>
                         </ul>
                     </li>
-                    <li>
-                        <a href="{% url 'adminnorders' %}" class="nav-link px-0 align-middle">
-                            <i class="fs-4 bi-table"></i> <span class="ms-1 d-none d-sm-inline">Orders</span></a>
+                    <li class="nav-item" style="margin-bottom: 10px;">
+                        <a href="{% url 'adminnorders' %}" class="nav-link px-0 align-middle" style="color: #ffffff; font-size: 18px; padding: 10px 15px; border-radius: 5px;">
+                            <i class="fa fa-table"></i> 
+                            <span class="ms-1 d-none d-sm-inline">Orders</span>
+                        </a>
                     </li>
-                    <li>
-                        <a href="{% url 'coupon' %}" class="nav-link px-0 align-middle">
-                            <i class="fs-4 bi-table"></i> <span class="ms-1 d-none d-sm-inline">Coupons</span></a>
+                    <li class="nav-item" style="margin-bottom: 10px;">
+                        <a href="{% url 'manage-cancellations' %}" class="nav-link px-0 align-middle" style="color: #ffffff; font-size: 18px; padding: 10px 15px; border-radius: 5px;">
+                            <i class="fa fa-times-circle"></i> 
+                            <span class="ms-1 d-none d-sm-inline">Order Cancellations</span>
+                        </a>
                     </li>
-                    <li>
-                        <a href="{% url 'category-offers' %}" class="nav-link px-0 align-middle">
-                            <i class="fs-4 bi-table"></i> <span class="ms-1 d-none d-sm-inline"> category Offers</span></a>
+                    <li class="nav-item" style="margin-bottom: 10px;">
+                        <a href="{% url 'coupon' %}" class="nav-link px-0 align-middle" style="color: #ffffff; font-size: 18px; padding: 10px 15px; border-radius: 5px;">
+                            <i class="fa fa-ticket"></i> 
+                            <span class="ms-1 d-none d-sm-inline">Coupons</span>
+                        </a>
                     </li>
-                    <li>
-                        <a href="{% url 'product-offers' %}" class="nav-link px-0 align-middle">
-                            <i class="fs-4 bi-table"></i> <span class="ms-1 d-none d-sm-inline"> product Offers</span></a>
+                    <li class="nav-item" style="margin-bottom: 10px;">
+                        <a href="{% url 'category-offers' %}" class="nav-link px-0 align-middle" style="color: #ffffff; font-size: 18px; padding: 10px 15px; border-radius: 5px;">
+                            <i class="fa fa-tags"></i> 
+                            <span class="ms-1 d-none d-sm-inline">Category Offers</span>
+                        </a>
                     </li>
-                    <li>
-                        <a href="{% url 'adminn-user-list' %}" class="nav-link px-0 align-middle">
-                            <i class="fs-4 bi-people"></i> <span class="ms-1 d-none d-sm-inline">Customers</span> </a>
+                    <li class="nav-item" style="margin-bottom: 10px;">
+                        <a href="{% url 'product-offers' %}" class="nav-link px-0 align-middle" style="color: #ffffff; font-size: 18px; padding: 10px 15px; border-radius: 5px;">
+                            <i class="fa fa-percent"></i> 
+                            <span class="ms-1 d-none d-sm-inline">Product Offers</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" style="margin-bottom: 10px;">
+                        <a href="{% url 'adminn-user-list' %}" class="nav-link px-0 align-middle" style="color: #ffffff; font-size: 18px; padding: 10px 15px; border-radius: 5px;">
+                            <i class="fa fa-users"></i> 
+                            <span class="ms-1 d-none d-sm-inline">Customers</span> 
+                        </a>
                     </li>
                 </ul>
-                <hr>
-                <div>
-                    <a href="{% url 'adminn-logout' %}" class="text-white text-decoration-none">Logout</a>
-                </div>
-                <div class="dropdown pb-4">
-                    <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-                        
-                        <span class="d-none d-sm-inline mx-1">Admin</span>
+                <hr style="width: 100%; border-color: #495057;">
+                <div style="text-align: center; width: 100%; margin-top: -10px;">
+                    <a href="{% url 'adminn-logout' %}" class="btn" style="background-color: #dc3545; border-color: #dc3545; color: white; font-size: 16px; padding: 10px 20px; border-radius: 5px;">
+                        Logout
                     </a>
                 </div>
-                
             </div>
-        </div>
-        <div class="content">
+        </nav>
+        
+        <!-- Content -->
+        <div class="content" style="flex-grow: 1; margin-left: 250px; padding: 20px; background-color: #ffffff; overflow-y: auto;">
+            <nav class="navbar navbar-expand-lg" style="background-color: #343a40; color: white;">
+                <a class="navbar-brand" href="#" style="color: white;">Admin Dashboard</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" style="color: white;">Welcome, Admin</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
             {% block content %}
             Content area...
             {% endblock %}
         </div>
     </div>
 
+    <!-- JavaScript and dependencies -->
     <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
-    <script src="{% static 'js/jquery.magnific-popup.min.js' %}"></script>
-    <script src="{% static 'js/jquery.slicknav.js' %}"></script>
-    <script src="{% static 'js/owl.carousel.min.js' %}"></script>
-    <script src="{% static 'js/jquery.nice-select.min.js' %}"></script>
-    <script src="{% static 'js/mixitup.min.js' %}"></script>
-    <script src="{% static 'js/main.js' %}"></script>
 
-    {% block extra_js %}{% endblock %}
 </body>
 </html>

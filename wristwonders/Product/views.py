@@ -72,7 +72,7 @@ def undo_category(request,pk):
     
 def Product_list(request):
     if 'adminn' in request.session:
-        products = Product.objects.all().order_by('last_update')
+        products = Product.objects.all().order_by('-last_update')
         
         return render(request,'product-list.html',{'products':products})
     return redirect(admin_login)
@@ -101,8 +101,8 @@ def Add_product(request):
     storage = messages.get_messages(request)
     storage.used = True
 
-    valid_image_extensions = {'.jpg','.png','.jpeg'}
-    valid_mime = {'image/jpeg','image/jpg','image/png'}
+    valid_image_extensions = {'.jpg','.png','.jpeg','.webp'}
+    valid_mime = {'image/jpeg','image/jpg','image/png','image/webp'}
     image_errors = []
 
     if 'adminn' in request.session:
@@ -111,15 +111,15 @@ def Add_product(request):
             
             images = request.FILES.getlist('images')
             for image in images:
-                print("hiii")
+                print("hii")
                 print(image)
                 _, ext = os.path.splitext(image.name.lower())
                 if ext not in valid_image_extensions:
                     image_errors.append(f"Invalid file extension: {ext}. Allowed extensions are {', '.join(valid_image_extensions)}.")
 
                 mime_type, _ = mimetypes.guess_type(image.name)
-                if mime_type not in valid_mime:
-                    image_errors.append(f"Invalid MIME type: {mime_type}. Allowed MIME types are {', '.join(valid_mime)}.")
+                # if mime_type not in valid_mime:
+                #     image_errors.append(f"Invalid MIME type: {mime_type}. Allowed MIME types are {', '.join(valid_mime)}.")
             
             if image_errors: 
                 for error in image_errors:
@@ -149,7 +149,7 @@ def Add_product(request):
                         print(img)
                         
                         product_image.objects.create(product = product,image = img)
-                        return redirect(Product_list)
+                    return redirect(Product_list)
                 
         else:
             product_form = Product_Form()

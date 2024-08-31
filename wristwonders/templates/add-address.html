@@ -35,42 +35,77 @@
                 <label for="{{ f.house_name.id_for_label }}" class="col-sm-4 col-form-label">{{ f.house_name.label_tag }}</label>
                 <div class="col-sm-8">
                     {{ f.house_name }}
+                    {% if f.house_name.errors %}
+                        <div class="text-danger">
+                            {{ f.house_name.errors }}
+                        </div>
+                    {% endif %}
                 </div>
             </div>
             <div class="form-group row">
                 <label for="{{ f.street.id_for_label }}" class="col-sm-4 col-form-label">{{ f.street.label_tag }}</label>
                 <div class="col-sm-8">
                     {{ f.street }}
+                    {% if f.street.errors %}
+                        <div class="text-danger">
+                            {{ f.street.errors }}
+                        </div>
+                    {% endif %}
                 </div>
             </div>
             <div class="form-group row">
                 <label for="{{ f.city.id_for_label }}" class="col-sm-4 col-form-label">{{ f.city.label_tag }}</label>
                 <div class="col-sm-8">
                     {{ f.city }}
+                    {% if f.city.errors %}
+                        <div class="text-danger">
+                            {{ f.city.errors }}
+                        </div>
+                    {% endif %}
                 </div>
             </div>
             <div class="form-group row">
                 <label for="{{ f.district.id_for_label }}" class="col-sm-4 col-form-label">{{ f.district.label_tag }}</label>
                 <div class="col-sm-8">
                     {{ f.district }}
+                    {% if f.district.errors %}
+                        <div class="text-danger">
+                            {{ f.district.errors }}
+                        </div>
+                    {% endif %}
                 </div>
             </div>
             <div class="form-group row">
                 <label for="{{ f.state.id_for_label }}" class="col-sm-4 col-form-label">{{ f.state.label_tag }}</label>
                 <div class="col-sm-8">
                     {{ f.state }}
+                    {% if f.state.errors %}
+                        <div class="text-danger">
+                            {{ f.state.errors }}
+                        </div>
+                    {% endif %}
                 </div>
             </div>
             <div class="form-group row">
                 <label for="{{ f.pincode.id_for_label }}" class="col-sm-4 col-form-label">{{ f.pincode.label_tag }}</label>
                 <div class="col-sm-8">
                     {{ f.pincode }}
+                    {% if f.pincode.errors %}
+                        <div class="text-danger">
+                            {{ f.pincode.errors }}
+                        </div>
+                    {% endif %}
                 </div>
             </div>
             <div class="form-group row">
                 <label for="{{ f.phone_no.id_for_label }}" class="col-sm-4 col-form-label">{{ f.phone_no.label_tag }}</label>
                 <div class="col-sm-8">
                     {{ f.phone_no }}
+                    {% if f.phone_no.errors %}
+                        <div class="text-danger">
+                            {{ f.phone_no.errors }}
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

@@ -40,6 +40,8 @@ class Product(models.Model):
     stock = models.PositiveIntegerField()
     last_update = models.DateTimeField(auto_now_add=True)
     brand = models.ForeignKey(Brand,on_delete=models.CASCADE)
+    colour = models.CharField()
+    parent_product = models.ForeignKey('self', null=True, blank=True, related_name='variants', on_delete=models.CASCADE)
     
 
 
@@ -49,6 +51,7 @@ class Product(models.Model):
 # class ProductVarient(models.Model):
 #     product = models.ForeignKey(Product,on_delete=models.CASCADE)
 #     colour = models.CharField(max_length=100)
+#     image = models.FileField(upload_to = 'images')
 #     def __str__(self) -> str:
 #         return f"{self.product.Product_name} - {self.colour}"
 

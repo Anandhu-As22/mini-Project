@@ -27,6 +27,13 @@ urlpatterns =[
     path('add-product-offer/', views.add_product_offer, name='add-product-offer'),
     path('edit-product-offers/<pk>',views.editProductOffers,name="edit-product-offers"),
     path('delete-productoffer/<pk>',views.deleteProductOffer,name="delete-productoffer"),
+
+
+
+    path('order_cancellations/',views.manage_cancellations,name="manage-cancellations"),
+    path('cancel-approved/<pk>',views.approve_cancellations,name="approve-cancellations"),
+    path('reject-cancellation/<pk>',views.reject_cancellation,name="reject-cancellation")
+
     
 
 

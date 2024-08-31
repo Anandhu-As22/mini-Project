@@ -90,6 +90,10 @@
                                                 </div>
                                             </label>
                                         </div>
+                                       
+                                        <div id="error-message" class="alert alert-danger" style="display: none;"></div>
+
+                                        
                                     </div>
                                 </div>
                                 <div class="checkout-item list-group-item mb-4 p-4 rounded-3 border-0 shadow-sm"> 
@@ -139,6 +143,12 @@
                             <p class="mb-0">Subtotal:</p>
                             <p class="mb-0">{{ totalprice }}</p>
                         </div>
+                        {% if coupon %}
+                            <div class="d-flex justify-content-between">
+                                <p class="mb-0">discount:</p>
+                                <p class="mb-0">{{ coupon.discount }}</p>
+                            </div>
+                        {% endif %}
                         <div class="d-flex justify-content-between">
                             <p class="mb-0">Shipping:</p>
                             <p class="mb-0">Free</p>

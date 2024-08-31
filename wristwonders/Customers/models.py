@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from Product.models import Product
 from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
 # Create your models here.
 
 class User(AbstractUser):
@@ -26,6 +27,8 @@ class User_address(models.Model):
         max_length=10,
         default='1234567890'  # Ensure default is a string
     )
+
+    
 
 class Cart(models.Model):
     customer = models.ForeignKey(User,on_delete=models.CASCADE)

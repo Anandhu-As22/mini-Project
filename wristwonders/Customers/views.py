@@ -9,6 +9,7 @@ from django.contrib import messages
 from orders.models import Order,Order_item
 from django.utils import timezone
 from decimal import Decimal
+from django.db.models import Q
 
 from django.core.paginator import Paginator
 
@@ -49,6 +50,11 @@ def product_detail(request,pk):
         username = request.session['user']
         user = get_object_or_404(User, username=username)
         product =get_object_or_404(Product,pk=pk)
+        all_products = []
+        product_variants = product.variants.all()
+        if product_variants:
+            all_products =  [product] + list(product_variants)
+        print(product_variants,'varient')
         related_products = Product.objects.filter(category=product.category).exclude(pk=pk)
         category_offer = Category_offer.objects.filter(category=product.category,
                                                    start_date__lte=timezone.now(),
@@ -86,7 +92,7 @@ def product_detail(request,pk):
             discounted_price = product_discounted_price
         print("dicsount price",discounted_price)
        
-        return render(request,'product-page.html',{'product':product,'related_products':related_products,'discounted_price': discounted_price,'product_in_wishlist': product_in_wishlist})
+        return render(request,'product-page.html',{'product':product,'related_products':related_products,'discounted_price': discounted_price,'product_in_wishlist': product_in_wishlist,'varients':all_products})
     return redirect(user_login)
 
 
@@ -99,6 +105,7 @@ def view_cart(request):
     if 'user' in request.session:
         try:
             cart = Cart.objects.get(customer=request.user)
+            print(cart.id)
             cart_items = Cart_items.objects.filter(cart=cart)
             for item in cart_items:
                 
@@ -131,6 +138,9 @@ def view_cart(request):
                     item.product.price = item.product.price
                 
                 item.total_price = item.product.price * item.quantity
+                print(type(item.total_price))
+                for i in cart_items:
+                    print(type(i),i)
             total_price = sum(item.get_total() for item in cart_items)
         except Cart.DoesNotExist:
             cart_items = []
@@ -196,6 +206,9 @@ def remove_cart(request, pk):
             return JsonResponse({'success': False, 'error': 'Item or cart does not exist'})
     return JsonResponse({'success': False, 'error': 'User not logged in'})
 
+
+
+
 def update_cart(request, pk):
     if request.method == "POST":
         cart_item = get_object_or_404(Cart_items, pk=pk)
@@ -252,6 +265,8 @@ def update_cart(request, pk):
 
     
 
+
+
 def user_profile(request,pk):
     if 'user' in request.session:
         try:
@@ -261,6 +276,7 @@ def user_profile(request,pk):
             orders =  Order.objects.filter(user_id = pk).order_by('-created_at')
             wallet = get_object_or_404(Wallet, user=user)
             transactions = Transaction.objects.filter(wallet=wallet).order_by('-Transaction_date')
+            print(wallet)
             # print(orders)
 
             paginator = Paginator(orders,10)
@@ -569,6 +585,8 @@ def add_funds(request):
 
 
 
-
+def change_password(request):
+    if 'user' in request.session:
+        pass
 
         

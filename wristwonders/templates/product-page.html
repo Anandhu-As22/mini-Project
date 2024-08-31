@@ -96,8 +96,25 @@
                                     </div>
                                 {% endif %}
                             </div>
-                        </div>                       
-                        
+                        </div>  
+                        <br>
+                        <br>                     
+                        <div class="product-variants">
+                            <h6>variants</h6>
+                            {% if varients %}
+                                <ul>
+                                    {% for variant in varients %}
+                                    
+                                        
+                                        
+                                        <a href="{% url 'product-detail' variant.pk %}"><img src="{{ variant.images.all.first.image.url }}" alt="{{ item.product.Product_name }}" style="width: 80px; height: auto;"></a>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p>No variants available.</p>
+                            {% endif %}
+                        </div>
+    
 
 
                         <!-- <a href="{% url 'add-wishlist' product.id %}"><button type = "button" class = "buy-now-btn"><i class = "fas fa-wallet"></i>wishlist</button></a> -->

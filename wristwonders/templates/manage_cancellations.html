@@ -1,0 +1,105 @@
+{% extends 'admin-sidebar.html' %}
+
+{% block content %}
+
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+    .container {
+        margin-top: 50px;
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+        margin-bottom: 30px;
+        color: #343a40;
+    }
+    table {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    thead {
+        background-color: #343a40;
+        color: #ffffff;
+    }
+    th, td {
+        padding: 12px;
+        text-align: left;
+    }
+    th {
+        font-weight: bold;
+    }
+    .btn {
+        margin-right: 5px;
+    }
+    .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+    .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+    .no-cancellations {
+        color: #dc3545;
+        font-size: 18px;
+    }
+</style>
+
+<body>
+    <div class="container">
+        <h1>Pending Order Cancellations</h1>
+
+        {% if pending_cancellations %}
+            <table class="table table-bordered table-hover">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Order ID</th>
+                        <th>User</th>
+                        <th>Reason</th>
+                        <th>Cancelled At</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cancellation in pending_cancellations %}
+                        <tr>
+                            <td>{{ cancellation.order.id }}</td>
+                            <td>{{ cancellation.order.user.username }}</td>
+                            <td>{{ cancellation.reason }}</td>
+                            <td>{{ cancellation.cancelled_at }}</td>
+                            <td>
+                                <span class="badge badge-warning">{{ cancellation.cancel_status }}</span>
+                            </td>
+                            <td>
+                                <form action="{% url 'approve-cancellations' cancellation.id %}" method="post" style="display:inline-block;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-success">Approve</button>
+                                </form>
+                                <form action="{% url 'reject-cancellation' cancellation.id %}" method="post" style="display:inline-block;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger">Reject</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="no-cancellations">No pending cancellations at the moment.</p>
+        {% endif %}
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+{% endblock %}
+
+

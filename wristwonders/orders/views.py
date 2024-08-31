@@ -12,9 +12,9 @@ from decimal import Decimal
 from django.views.decorators.csrf import csrf_exempt
 import razorpay
 from django.conf import settings
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponseBadRequest,JsonResponse
 from orders.forms import OrderCancellationForm
-
+from django.contrib import messages
 
 from django.http import HttpResponse
 from django.template.loader import get_template
@@ -120,8 +120,13 @@ def Order_success(request):
             except Coupon.DoesNotExist:
                 return HttpResponse("Error: Invalid coupon code")
             print('after coupon applied total_price',total_price )
+            return JsonResponse({'status':'success'})
         
-            
+
+        if payment == 'cod':
+            if total_price > 1000:
+                messages.error(request,"cash on delivery is not applicable for above 1000 ")
+                return  redirect(Checkout)
         
         
         order = Order.objects.create(
@@ -149,8 +154,8 @@ def Order_success(request):
 
             product.stock -= quantity
             product.save()
-        
         cart_items.delete()
+        
         if payment == 'razorpay':
             print("haii")
             request.session['total_price'] = str(total_price)
@@ -164,11 +169,17 @@ def Order_success(request):
                 wallet.save()
                 order.payment_status = 'paid'
                 order.save()
+            
                 
                 Transaction.objects.create(wallet=wallet, amount=total_price, transaction_type='debit')
             else:
-                return HttpResponse('Error : insufficient fund in wallet')
-            
+                
+                order.delete()
+                messages.error(request, "insufficient balance in wallet")
+                
+               
+        
+       
         return render(request, 'order-success.html')
     
     return redirect(Checkout)
@@ -188,28 +199,14 @@ def ordercancel(request,pk):
             form = OrderCancellationForm(request.POST)
 
             if form.is_valid():
+                print(' inside reason form ')
 
-                for item in orderitem:
-                    item.Product.stock +=item.quantity
-                    item.Product.save()
-        
-                order.is_cancelled = True
-            
-                order.save()
-                if order.payment_status == 'paid':
-                    wallet = get_object_or_404(Wallet,user = user)
-                    transaction = Transaction.objects.filter(wallet = wallet)
-                    wallet.amount += order.total_price
-                    wallet.save()
-                    order.payment_status = 'refunded to your wallet'
-                    order.save()
-
-                    Transaction.objects.create(wallet=wallet, amount=order.total_price, transaction_type='credit')
-
+                
                 
                 Order_cancellation.objects.create(
                     order=order,
-                    reason=form.cleaned_data['reason']
+                    reason=form.cleaned_data['reason'],
+                    cancel_status ='pending'
                 )
 
                 return redirect(user_profile,pk = user.id)
@@ -270,7 +267,7 @@ def paymenthomepage(request):
 @csrf_exempt
 def paymenthandler(request):
     print("hyyy")
-    if 'adminn' in request.session:
+    if 'user' in request.session:
         print('paymenthandeler')
         
         if request.method =='POST':

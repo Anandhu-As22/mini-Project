@@ -196,7 +196,7 @@
                                     </td>
                                     <td>
                                         {% if order.is_cancelled %}
-                                            {% if order.payment_status == 'refunded to your wallet' %}
+                                            {% if order.payment_status == 'refunded to wallet' %}
                                                 <p>refunded to your wallet</p>
                                             {% else %}
                                                 <p>order cancelled</p>
@@ -419,3 +419,4 @@
 </body>
 
 {% endblock %}
+
