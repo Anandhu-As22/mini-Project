@@ -13,6 +13,10 @@ from django.db.models import Q
 
 from django.core.paginator import Paginator
 
+
+from django.contrib.auth.hashers import check_password,make_password
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import never_cache
 # Create your views here.
 
 
@@ -27,7 +31,8 @@ def index_page(request):
 
 
 # home after login
-
+@login_required
+@never_cache
 def Home_page(request):
     if request.user.is_authenticated:
         request.session['user'] = request.user.username
@@ -37,8 +42,7 @@ def Home_page(request):
         except:
             pass
         category = Category.objects.all().exclude(soft_delete = True),
-        products = Product.objects.all().exclude(soft_delete = True)
-
+        products = Product.objects.all().exclude(soft_delete = True)[:8]
         return render(request,'home.html',{'products':products,'category':category})
     return redirect(user_login)
 
@@ -586,7 +590,31 @@ def add_funds(request):
 
 
 def change_password(request):
+    print(request.session)
     if 'user' in request.session:
-        pass
+        username = request.session['user']
+        user = get_object_or_404(User,username=username)
+        if request.method == 'POST':
+            current_password = request.POST.get('current_password')
+            new_password = request.POST.get('new_password')
+            print(new_password)
+            print(current_password)
+
+            if check_password(current_password,user.password):
+                
+                
+
+                user.password = make_password(new_password)
+                user.save()
+
+                return redirect(user_profile,pk=user.id)
+            else:
+                error = "currentpassword is incorrect"
+
+                return render(request,'change_password.html',{'error':error})
+
+        return render(request,'change_password.html')
+    return redirect(user_login)
+
 
         

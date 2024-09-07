@@ -20,7 +20,8 @@ urlpatterns =[
     path('wishlist/',views.wish_list,name='wishlist'),
     path('add-wishlist/<int:pk>/',views.add_wishlist,name='add-wishlist'),
     path('remove-wishlist/<int:pk>/',views.remove_wishlist,name='remove-wishlist'),
-    path('add_funds/', views.add_funds, name='add_funds')
+    path('add_funds/', views.add_funds, name='add_funds'),
+    path('change_password/',views.change_password,name='change_password')
 
 
 

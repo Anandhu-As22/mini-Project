@@ -41,14 +41,15 @@
                         {% endfor %}
                         </ul>
                     
-                {% endif %}
-                {% if messages %}
+                    {% endif %}
+                    {% if messages %}
                     <ul class="messages">
-                        {% for message in get_messages %}
-                            <li class="message {{ message.tags }}">{{ message }}</li>
+                        {% for message in messages %}
+                            <li class="alert {{ message.tags }}">{{ message }}</li>
                         {% endfor %}
                     </ul>
-                {% endif %}
+                    {% endif %}
+                
                     </div>
                                
                         

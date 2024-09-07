@@ -57,48 +57,49 @@
                                     </div>
                                     {% endfor %}
                                 </div>
-                                <div class="checkout-item list-group-item mb-4 p-4 rounded-3 border-0 shadow-sm">
-                                    
+<!-- Payment Info Section -->
+                                <div class="checkout-item list-group-item p-2 rounded-3 border-0 shadow-sm">                                    
                                     <h6>Payment Info</h6>
-                                    
+                                
                                     <p class="text-muted">Select a payment method:</p>
+                                    
                                     <div class="row">
-                                        <div class="col-lg-4">
-                                            <label class="d-block mb-3">
+                                        <div class="col-sm-4">
+                                            <label class="payment-option mb-3">
                                                 <input type="radio" name="pay-method" value="wallet" class="me-2" required>
-                                                <div class="border p-3 rounded text-center shadow-sm">
+                                                <div class="payment-box">
                                                     <i class="bx bx-credit-card fs-1"></i>
-                                                    <p class="mb-0">wallet</p>
+                                                    <p class="mb-0">Wallet</p>
                                                 </div>
                                             </label>
                                         </div>
-                                        <div class="col-lg-4">
-                                            <label class="d-block mb-3">
+                                        <div class="col-sm-4">
+                                            <label class="payment-option mb-3">
                                                 <input type="radio" name="pay-method" value="razorpay" class="me-2">
-                                                <div class="border p-3 rounded text-center shadow-sm">
+                                                <div class="payment-box">
                                                     <i class="bx bxl-razorpay fs-1"></i>
-                                                    <p class="mb-0">razorpay</p>
+                                                    <p class="mb-0">Razorpay</p>
                                                 </div>
                                             </label>
                                         </div>
-                                        <div class="col-lg-4">
-                                            <label class="d-block mb-3">
+                                        <div class="col-sm-4">
+                                            <label class="payment-option mb-3">
                                                 <input type="radio" name="pay-method" value="cod" class="me-2">
-                                                <div class="border p-3 rounded text-center shadow-sm">
+                                                <div class="payment-box">
                                                     <i class="bx bx-money fs-1"></i>
-                                                    <p class="mb-0">Cash on Delivery</p>
+                                                    <p class="mb-0">COD</p>
                                                 </div>
                                             </label>
                                         </div>
-                                       
-                                        <div id="error-message" class="alert alert-danger" style="display: none;"></div>
-
-                                        
                                     </div>
                                 </div>
-                                <div class="checkout-item list-group-item mb-4 p-4 rounded-3 border-0 shadow-sm"> 
-                                    <input type="text" id="coupon_code" name="coupon" placeholder="Enter Coupon Code">
-                                    <button type="button" id="apply_coupon" class="btn btn-primary">Apply Coupon</button>
+
+                                <div class="checkout-item list-group-item mb-4 p-4 rounded-3 border-0 shadow-sm">
+                                    <input type="text" id="coupon_code" name="coupon" class="form-control mb-3" placeholder="Enter Coupon Code">
+                                    <div class="d-flex justify-content-between">
+                                        <button type="button" id="apply_coupon" class="btn bt-sm btn-coupon-apply">Apply Coupon</button>
+                                        <button type="submit" name="remove_coupon" value="1" class="btn btn-sm btn-coupon-remove">Remove Coupon</button>
+                                    </div>
                                 </div>
                                 
                                 <div class="d-flex justify-content-between">
@@ -164,41 +165,78 @@
                     </div>
                 </div>
             </div>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#codModal">
+                Test Modal
+            </button>
             
         </div>
     </div>
 </div>
+<!-- COD Restriction Modal -->
+<div class="modal fade" id="codModal" tabindex="-1" aria-labelledby="codModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="codModalLabel">Payment Method Not Available</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Cash on Delivery is not applicable for orders more than 1000. Please choose another payment method.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Back</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+ 
+
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script id="total_price" type="application/json">{{ totalprice|json_script:"totalprice" }}</script>
 <script>
-    $(document).ready(function() {
-        $('#apply_coupon').click(function() {
-            var couponCode = $('#coupon_code').val();
-            var totalPrice = parseFloat($('#total_price').text());
+  $(document).ready(function() {
+    // Apply Coupon Code
+    $('#apply_coupon').click(function() {
+        var couponCode = $('#coupon_code').val();
+        var totalPrice = parseFloat($('#total_price').text());
 
-            $.ajax({
-                url: '{% url "apply_coupon" %}',
-                method: 'POST',
-                data: {
-                    'coupon': couponCode,
-                    'totalprice': totalPrice,
-                    'csrfmiddlewaretoken': '{{ csrf_token }}'
-                },
-                success: function(response) {
-                    if (response.status == 'success') {
-                        $('#updated_total').text(response.new_total_price);
-                    } else {
-                        alert(response.message);
-                    }
-                },
-                error: function() {
-                    alert('An error occurred while applying the coupon.');
+        $.ajax({
+            url: '{% url "apply_coupon" %}',
+            method: 'POST',
+            data: {
+                'coupon': couponCode,
+                'totalprice': totalPrice,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.status == 'success') {
+                    $('#updated_total').text(response.new_total_price);
+                } else {
+                    alert(response.message);
                 }
-            });
+            },
+            error: function() {
+                alert('An error occurred while applying the coupon.');
+            }
         });
     });
+    
+    // Check for COD restriction and trigger modal
+    $('form').submit(function(event) {
+        var paymentMethod = $('input[name="pay-method"]:checked').val();
+        var totalPrice = parseFloat($('#total_price').text());  // Convert to float to ensure correct comparison
+
+        if (paymentMethod === 'cod' && totalPrice > 1000) {
+            event.preventDefault(); // Prevent form submission
+            $('#codModal').modal('show'); // Show modal
+        }
+    });
+});
+
+
 </script>
 
 
@@ -279,6 +317,101 @@
         max-width: 50px;
         max-height: 50px;
     }
+    /* Coupon Button Styles with Gradient */
+.btn-coupon-apply {
+    background: linear-gradient(90deg, #00b4db, #0083b0);
+    border: none;
+    color: #fff;
+    
+    border-radius: 3px;
+    font-weight: bold;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.btn-coupon-apply:hover {
+    background: linear-gradient(90deg, #0083b0, #005f73);
+    transform: translateY(-2px);
+}
+
+.btn-coupon-remove {
+    background: linear-gradient(90deg, #ff416c, #ff4b2b);
+    border: none;
+    color: #fff;
+    
+    border-radius: 3px;
+    font-weight: bold;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.btn-coupon-remove:hover {
+    background: linear-gradient(90deg, #ff4b2b, #ff1e56);
+    transform: translateY(-2px);
+}
+
+/* Coupon Input Field */
+#coupon_code {
+    border-radius: 4px;
+    padding: 8px;
+    border: 1px solid #ced4da;
+    transition: box-shadow 0.2s ease;
+}
+
+#coupon_code:focus {
+    box-shadow: 0 0 5px rgba(0, 131, 176, 0.5);
+    outline: none;
+}
+/* Enhanced Payment Info Styles */
+.payment-option {
+    display: block;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.payment-box {
+    padding: 20px;
+    text-align: center;
+    width:fit-content;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    
+}
+
+.payment-box i {
+    font-size: 0.5rem;
+    color: #007bff;
+}
+
+.payment-box p {
+    font-weight: bold;
+    color: #343a40;
+    margin-top: 10px;
+}
+
+.payment-option input[type="radio"] {
+    display: none;
+}
+
+.payment-option input[type="radio"]:checked + .payment-box {
+    border: 2px solid #007bff;
+    background: linear-gradient(135deg, #e0f7ff, #cfefff);
+    box-shadow: 0 6px 12px rgba(0, 123, 255, 0.2);
+    transform: translateY(-3px);
+}
+
+.payment-box:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+/* Smooth Transitions for Interactions */
+.payment-option input[type="radio"]:focus + .payment-box {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+
 </style>
     
 

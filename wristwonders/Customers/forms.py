@@ -23,6 +23,8 @@ class addaddressform(forms.ModelForm):
             raise forms.ValidationError('pincode must only contains digits')
         if len(pincode) !=6 :
             raise forms.ValidationError('pincode must contains 6 digits')
+        if pincode == 000000:
+            raise forms.ValidationError('pincode must be greater than 0')
         return pincode
 
 
@@ -46,6 +48,8 @@ class editaddressform(ModelForm):
             raise forms.ValidationError('pincode must only contains digits')
         if len(pincode) !=6 :
             raise forms.ValidationError('pincode must contains 6 digits')
+        if pincode == 000000:
+            raise forms.ValidationError('pincode must be greater than 0')
         return pincode
 
 class edituserform(ModelForm):

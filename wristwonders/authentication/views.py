@@ -9,10 +9,13 @@ from django.urls import reverse
 from django .template.loader import render_to_string
 from Customers.models import User,Wallet,Wishlist
 import time
+
+
+
 # Create your views here.
 
 # user login
-
+@never_cache
 def user_login(request):
     if request.method == "POST":
         form = LoginForm(request.POST)
@@ -31,14 +34,14 @@ def user_login(request):
                     return redirect('home')
                 else:
                     print('user blocked')
-                    # messages.error(request,'user account is block')
+                    messages.error(request,'user account is block')
             else:
                 print('invalid')
                 messages.error(request,"Invalid username or password")
                 
     else:
         form = LoginForm()
-    return render(request,'user-login.html',{'form':form,'messages':messages})
+    return render(request,'user-login.html',{'form':form})
 
 
 
@@ -297,14 +300,15 @@ def forgot_password_verification(request):
 
 # user logout
 
-@never_cache
+
 def user_logout(request):
     
     logout(request)
-    if 'user' in request.session:
-        del request.session['user']
-    
-    return redirect('index')
+   
+    return redirect('post-logout')
+
+def post_logout(request):
+    return render(request,'post-logout.html')
 
 
 
@@ -317,7 +321,7 @@ def admin_login(request):
         if form.is_valid():
             name = form.cleaned_data['username']
             password = form.cleaned_data['password']
-             
+            
             user = authenticate(request,username=name,password=password)
             print(user)
 
@@ -325,8 +329,10 @@ def admin_login(request):
                 print('user')
                 if user.is_staff:
                     print('super')
+                    
+                    request.session['adminn']=name 
+                    request.session_key = 'admin_sessionid'
                     login(request,user)
-                    request.session['adminn']=name
                     print(name)
                     return redirect('admin-home')
                 else:
@@ -339,7 +345,6 @@ def admin_login(request):
   
 @never_cache
 def adminn_logout(request):
-    
     logout(request)
     return redirect(admin_login)
 

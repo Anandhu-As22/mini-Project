@@ -187,6 +187,9 @@
                                             {% else %}
                                                 <p style="color:red">{{ order.return_status }}</p>
                                             {% endif %}
+                                        {% elif order.cancellations.cancel_status == 'pending' %}
+                                            <p> cancellation request send</p>
+                                       
                                         {% elif order.is_cancelled %}
                                             <p>cancelled</p>
                                         {% else %}
@@ -195,7 +198,9 @@
                                         
                                     </td>
                                     <td>
+                                        
                                         {% if order.is_cancelled %}
+
                                             {% if order.payment_status == 'refunded to wallet' %}
                                                 <p>refunded to your wallet</p>
                                             {% else %}
@@ -233,7 +238,7 @@
                         </table>
                         <!-- pagination of orders -->
                         <nav aria-label="...">
-                            <ul class="pagination">
+                            <ul class="pagination justify-content-center">
                                 {% if orders.has_previous %}
                                 <li class="page-item ">
                                     <a class="page-link" href="?page={{orders.previous_page_number}}" tabindex="-1" aria-disabled="true">Previous</a>
@@ -300,7 +305,7 @@
                             </tbody>
                         </table>
                         <nav aria-label="...">
-                            <ul class="pagination">
+                            <ul class="pagination justify-content-center">
                                 {% if transactions.has_previous %}
                                 <li class="page-item ">
                                     <a class="page-link" href="?page={{transactions.previous_page_number}}" tabindex="-1" aria-disabled="true">Previous</a>
@@ -376,6 +381,10 @@
                         <a href="{% url 'add-address' %}?next={{ request.path }}">
                             <button class="btn btn-info mt-4">Add Address</button>
                         </a>
+                    
+                    </div>
+                    <div class="text-right">
+                        <a href="{% url 'change_password' %}" class="btn btn-warning mt-4"> Change Password</a>
                     </div>
                     
                 </div>
@@ -404,6 +413,7 @@
                 <a id="confirmDeleteButton" class="btn btn-danger">Delete</a>
             </div>
         </div>
+        
     </div>
 </div>
 

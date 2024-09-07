@@ -35,6 +35,8 @@ def Order_success(request):
         select_address_id = request.POST.get('address')
         payment = request.POST.get('pay-method')
         coupon = request.POST.get('coupon')
+        remove_coupon = request.POST.get('remove_coupon',None)
+        print(payment)
 
         user = get_object_or_404(User, username=username)
 
@@ -107,10 +109,11 @@ def Order_success(request):
 
 
 
-        if coupon:
+        if coupon and not remove_coupon:
             
             try:
                 coupon = Coupon.objects.get(coupon_code=coupon, is_active=True)
+                
                 if total_price >= coupon.min_purchase_amount:
                     
                     total_price -= float(coupon.discount)
@@ -119,15 +122,59 @@ def Order_success(request):
                     return HttpResponse("Error: Minimum purchase amount for the coupon is not met")
             except Coupon.DoesNotExist:
                 return HttpResponse("Error: Invalid coupon code")
-            print('after coupon applied total_price',total_price )
-            return JsonResponse({'status':'success'})
-        
+            # print('after coupon applied total_price',total_price )
+            #return JsonResponse({'status':'success'})
+        if remove_coupon:
+            coupon = None
+            messages.success(request,"coupon removed successfully")
+            return redirect(Checkout)
 
-        if payment == 'cod':
-            if total_price > 1000:
-                messages.error(request,"cash on delivery is not applicable for above 1000 ")
-                return  redirect(Checkout)
+        # if payment == 'cod':
+        #     if total_price < 1000:
+        #         print('cod above 1000')
+        #         messages.error(request,"cash on delivery is not applicable for above 1000 ")
+        #         # return  redirect(Checkout)
         
+        if payment =='wallet':
+            
+            wallet = get_object_or_404(Wallet,user=user)
+            transaction = Transaction.objects.filter(wallet=wallet)
+            if wallet.amount>total_price:
+                wallet.amount -=Decimal(total_price)
+                wallet.save()
+                order = Order.objects.create(
+                    user =user,
+                    created_at =timezone.now(),
+                    total_price = total_price,
+                    status ='pending',
+                    street_address = address.street,
+                    city  = address.city,
+                    district = address.district,
+                    state = address.state,
+                    pincode=address.pincode,
+                    payment=payment,
+                    payment_status='Paid',
+                    coupon=coupon if coupon else None 
+
+
+                )
+                for product, quantity, price in order_items:
+                    Order_item.objects.create(
+                        order=order,
+                        Product=product,
+                        quantity=quantity,
+                        price=price
+                    )
+
+                    product.stock -= quantity
+                    product.save()
+                cart_items.delete()
+
+                return render(request, 'order-success.html')
+            else:
+                return redirect(Checkout)
+            
+
         
         order = Order.objects.create(
             user=user,
@@ -143,6 +190,8 @@ def Order_success(request):
             payment_status='Pending',
             coupon=coupon if coupon else None 
         ) 
+       
+    
     
         for product, quantity, price in order_items:
             Order_item.objects.create(
@@ -161,21 +210,22 @@ def Order_success(request):
             request.session['total_price'] = str(total_price)
             request.session['order_id'] = order.id
             return redirect(paymenthomepage)
-        if payment == 'wallet':
-            wallet = get_object_or_404(Wallet,user = user)
-            transaction = Transaction.objects.filter(wallet = wallet)
-            if wallet.amount > total_price:
-                wallet.amount -= total_price
-                wallet.save()
-                order.payment_status = 'paid'
-                order.save()
+        # if payment == 'wallet':
+        #     wallet = get_object_or_404(Wallet,user = user)
+        #     transaction = Transaction.objects.filter(wallet = wallet)
+        #     if wallet.amount > total_price:
+        #         wallet.amount -= Decimal(total_price)
+        #         wallet.save()
+        #         order.payment_status = 'Paid'
+        #         order.save()
             
                 
-                Transaction.objects.create(wallet=wallet, amount=total_price, transaction_type='debit')
-            else:
+        #         Transaction.objects.create(wallet=wallet, amount=total_price, transaction_type='debit')
+        #     else:
                 
-                order.delete()
-                messages.error(request, "insufficient balance in wallet")
+        #         order.delete()
+        #         messages.error(request, "insufficient balance in wallet")
+            
                 
                
         
@@ -360,3 +410,60 @@ def order_pdf_view(request,pk):
     return redirect(user_login)
 
 
+
+# def remove_coupon(request):
+#     if 'user' not in request.session:
+#         return redirect('user_login') 
+
+#     user = request.user
+#     if request.method == 'POST':
+#         order_id = request.session.get('order_id')
+#         print (order_id)
+#         try:
+#             order = Order.objects.get(id=order_id, user=user)
+#         except Order.DoesNotExist:
+#             return JsonResponse({'status': 'error', 'message': 'Order not found.'})
+
+#         # Remove the coupon from the order
+#         if order.coupon:
+#             order.coupon = None  
+#             order.save()
+
+           
+#             cart_items = Cart_items.objects.filter(cart__customer_id=user.id)
+#             total_price = 0
+
+#             for item in cart_items:
+#                 product = item.product
+#                 # Apply the offers logic here, just like in the Order_success function
+#                 category_offer = Category_offer.objects.filter(category=item.product.category,
+#                                                                start_date__lte=timezone.now(),
+#                                                                end_date__gte=timezone.now()).first()
+#                 product_offer = ProductOffer.objects.filter(product=item.product,
+#                                                             start_date__lte=timezone.now(),
+#                                                             end_date__gte=timezone.now()).first()
+
+#                 if category_offer:
+#                     category_product_price = Decimal(item.product.price) - (
+#                             Decimal(item.product.price) * category_offer.discount_percentage / Decimal('100'))
+
+#                 if product_offer:
+#                     product_product_price = Decimal(item.product.price) - Decimal(product_offer.discount_price)
+
+#                 if category_offer and product_offer:
+#                     product_price = min(category_product_price, product_product_price)
+#                 elif category_offer:
+#                     product_price = category_product_price
+#                 elif product_offer:
+#                     product_price = product_product_price
+#                 else:
+#                     product_price = item.product.price
+
+#                 total_price += item.quantity * product_price
+
+#             # Return updated total price
+#             return JsonResponse({'status': 'success', 'new_total_price': total_price})
+#         else:
+#             return JsonResponse({'status': 'error', 'message': 'No coupon to remove.'})
+
+#     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})

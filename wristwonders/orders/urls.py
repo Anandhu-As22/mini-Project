@@ -12,5 +12,6 @@ urlpatterns = [
 
 
 
-    path('order-dettail-pdf/<int:pk>',views.order_pdf_view,name='order-pdf')
+    path('order-dettail-pdf/<int:pk>',views.order_pdf_view,name='order-pdf'),
+    # path('remove-coupon/', views.remove_coupon, name='remove_coupon'),
 ]
