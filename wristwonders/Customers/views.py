@@ -110,41 +110,41 @@ def view_cart(request):
         try:
             cart = Cart.objects.get(customer=request.user)
             print(cart.id)
-            cart_items = Cart_items.objects.filter(cart=cart)
-            for item in cart_items:
+            cart_items = Cart_items.objects.filter(cart=cart,product__soft_delete=False,product__category__soft_delete=False)
+            # for item in cart_items:
                 
-                category_offer = Category_offer.objects.filter(category=item.product.category,
-                                                               start_date__lte=timezone.now(),
-                                                               end_date__gte=timezone.now()).first()
+            #     category_offer = Category_offer.objects.filter(category=item.product.category,
+            #                                                    start_date__lte=timezone.now(),
+            #                                                    end_date__gte=timezone.now()).first()
                 
-                product_offer=ProductOffer.objects.filter(product=item.product,start_date__lte=timezone.now(),end_date__gte=timezone.now()).first()
-                
-                
+            #     product_offer=ProductOffer.objects.filter(product=item.product,start_date__lte=timezone.now(),end_date__gte=timezone.now()).first()
                 
                 
-                if category_offer:
-                    category_product_price = Decimal(item.product.price) - (Decimal(item.product.price) * category_offer.discount_percentage / Decimal('100'))
                 
-                if product_offer:
-                    product_product_price=Decimal(item.product.price)-Decimal(product_offer.discount_price)
+                
+            #     if category_offer:
+            #         category_product_price = Decimal(item.product.price) - (Decimal(item.product.price) * category_offer.discount_percentage / Decimal('100'))
+                
+            #     if product_offer:
+            #         product_product_price=Decimal(item.product.price)-Decimal(product_offer.discount_price)
                     
-                if category_offer and product_offer:
-                    if category_product_price < product_product_price:
-                        item.product.price = category_product_price
-                    else:
-                        item.product.price = product_product_price
-                elif category_offer:
-                    item.product.price=category_product_price
-                elif product_offer:
-                    item.product.price = product_product_price
+            #     if category_offer and product_offer:
+            #         if category_product_price < product_product_price:
+            #             item.product.price = category_product_price
+            #         else:
+            #             item.product.price = product_product_price
+            #     elif category_offer:
+            #         item.product.price=category_product_price
+            #     elif product_offer:
+            #         item.product.price = product_product_price
                     
-                else:
-                    item.product.price = item.product.price
+            #     else:
+            #         item.product.price = item.product.price
                 
-                item.total_price = item.product.price * item.quantity
-                print(type(item.total_price))
-                for i in cart_items:
-                    print(type(i),i)
+            #     item.total_price = item.product.price * item.quantity
+            #     print(type(item.total_price))
+                # for i in cart_items:
+                #     print(type(i),i)
             total_price = sum(item.get_total() for item in cart_items)
         except Cart.DoesNotExist:
             cart_items = []
@@ -157,16 +157,16 @@ def add_to_cart(request, pk):
         username = request.session['user']
         user = get_object_or_404(User, username=username)
         product = get_object_or_404(Product, pk=pk)
-        category_offer = Category_offer.objects.filter(category=product.category,
-                                                           start_date__lte=timezone.now(),
-                                                           end_date__gte=timezone.now()).first()
+        # category_offer = Category_offer.objects.filter(category=product.category,
+        #                                                    start_date__lte=timezone.now(),
+        #                                                    end_date__gte=timezone.now()).first()
         
-        product_price = Decimal(product.price)
-        if category_offer:
-            print("yes inside this")
-            category_discounted_price = product_price - (product_price * category_offer.discount_percentage / Decimal(100))
-        else:
-            product_price = product.price
+        # product_price = Decimal(product.price)
+        # if category_offer:
+        #     print("yes inside this")
+        #     category_discounted_price = product_price - (product_price * category_offer.discount_percentage / Decimal(100))
+        # else:
+        #     product_price = product.price
 
         cart, created = Cart.objects.get_or_create(customer=user)
 
@@ -228,7 +228,7 @@ def update_cart(request, pk):
         
         for item in cart_items:
 
-            category_offer = Category_offer.objects.filter(category=item.product.Category,
+            category_offer = Category_offer.objects.filter(category=item.product.category,
                                                            start_date__lte=timezone.now(),
                                                            end_date__gte=timezone.now()).first()
             
@@ -412,7 +412,7 @@ def Checkout(request):
             # getting the cart
 
             cart = Cart.objects.get(customer_id = user.id)
-            cart_items = Cart_items.objects.filter(cart = cart)
+            cart_items = Cart_items.objects.filter(cart = cart,product__soft_delete=False,product__category__soft_delete=False)
 
             if cart_items.exists():
                 for item in cart_items:
@@ -462,7 +462,7 @@ def Checkout(request):
 def all_products(request):
 
     active_category = Category.objects.filter(soft_delete = False)
-    products = Product.objects.filter(category__in = active_category,soft_delete = False)
+    # products = Product.objects.filter(category__in = active_category,soft_delete = False)
     brand = Brand.objects.all()
     search = request.GET.get('search','')
     sort_by = request.GET.get('sort','name')
@@ -472,6 +472,9 @@ def all_products(request):
     
     print('sort')
     print(search, 'search')
+
+    products = Product.objects.filter(soft_delete=False, category__in=active_category)
+    
     if search:
         products = Product.objects.filter(Product_name__icontains = search )
         # print(products)
@@ -501,8 +504,7 @@ def all_products(request):
     elif sort_by == 'low-high':
         products=products.order_by('price')
     
-    else:
-       products = products
+    
     
     paginator =  Paginator(products,8)
     page_number = request.GET.get('page',1)
@@ -597,17 +599,25 @@ def change_password(request):
         if request.method == 'POST':
             current_password = request.POST.get('current_password')
             new_password = request.POST.get('new_password')
+            confirm_password =request.POST.get('confirm_password')
             print(new_password)
             print(current_password)
+            print(confirm_password)
 
             if check_password(current_password,user.password):
-                
-                
 
-                user.password = make_password(new_password)
-                user.save()
+                if new_password == confirm_password:
 
-                return redirect(user_profile,pk=user.id)
+                    user.password = make_password(new_password)
+                    user.save()
+                    return redirect(user_profile,pk=user.id)
+                else:
+                    error= "new password and confirm password are not same"
+                    return render(request,'change_password.html',{'error':error})
+
+
+
+                
             else:
                 error = "currentpassword is incorrect"
 

@@ -28,6 +28,15 @@
                                         {% else %}
                                         <span class="badge bg-success">{{ order.status }}</span>
                                         {% endif %}</p>
+
+                    <div>
+                        <h4>billing address</h4>
+                        <br>
+                        <p>{{ order.street_address }}</p>
+                        <p>{{ order.city }}</p>
+                        
+                    </div>
+
                     <h5>Items:</h5>
                     <table class="table table-striped">
                         <thead>

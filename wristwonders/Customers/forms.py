@@ -23,7 +23,7 @@ class addaddressform(forms.ModelForm):
             raise forms.ValidationError('pincode must only contains digits')
         if len(pincode) !=6 :
             raise forms.ValidationError('pincode must contains 6 digits')
-        if pincode == 000000:
+        if pincode == 0:
             raise forms.ValidationError('pincode must be greater than 0')
         return pincode
 
@@ -48,17 +48,17 @@ class editaddressform(ModelForm):
             raise forms.ValidationError('pincode must only contains digits')
         if len(pincode) !=6 :
             raise forms.ValidationError('pincode must contains 6 digits')
-        if pincode == 000000:
+        if pincode == 0:
             raise forms.ValidationError('pincode must be greater than 0')
         return pincode
 
 class edituserform(ModelForm):
     class Meta:
         model = User
-        fields = ['username','first_name','last_name','email']
+        fields = ['username','first_name','last_name']
         widgets ={
             'username' : forms.TextInput(attrs={'placeholder':'username','class':'form-control'}),
             'first_name' : forms.TextInput(attrs={'placeholder':'first_name','class':'form-control'}),
             'last_name' : forms.TextInput(attrs={'placeholder':'last_name','class':'form-control'}),
-            'email' : forms.EmailInput(attrs={'placeholder':'email','class':'form-control'})
+            
         }

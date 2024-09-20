@@ -138,7 +138,24 @@
             margin-left: 10px;
             cursor: pointer;
         }
+        .col-lg-4 {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+            margin-bottom: 20px; 
+        }
+        canvas {
+            width: 100% !important;
+            height: 300px !important;
+        }
+
+
+
+
     </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="main-content">
@@ -162,81 +179,34 @@
             </div>
             <div class="col-lg-4 col-md-6">
                 <div class="card">
-                    <h3>Sales</h3>
+                    <h3>Sales amount</h3>
                     <p>{{ total_price }}</p>
                 </div>
             </div>
             <div class="col-lg-4 col-md-6">
                 <div class="card">
-                    <h3>Orders</h3>
-                    <p>{{ total_sale }}</p>
+                    
+                    <a href="">
+                        <h3>Sales count</h3>
+                        <p>{{ total_sale }}</p>
+                    </a>
                 </div>
             </div>
             
         </div>
 
         <div class="row gt-3 mt-3">
-            <div class="col-lg-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h3>Recent orders</h3>
-                        <a href="{% url 'adminnorders' %}"><button>See all <span class="las la-arrow-right"></span></button></a>
-                    </div>
-                    <div class="card-body">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Order id </th>
-                                    <th>payment status</th>
-                                    <th>order date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            {% for order in orders %}
-                                <tr>
-                                    <td>{{ order.id }}</td>
-                                    <td>{{ order.payment_status }}</td>
-                                    <td>{{ order.created_at|date:"F j,Y" }}</td>
-                                </tr>
-                            {% endfor %}
-                                <!-- Add more rows as needed -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+            
+
+            <div class="col-lg-4" >
+                <canvas id="myChart"></canvas>
             </div>
-            <div class="col-lg-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h3>New Customers</h3>
-                        <a href="{% url 'adminn-user-list' %}"><button>See all <span class="las la-arrow-right"></span></button></a>
-                    </div>
-                    <div class="card-body">
-                        
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>username </th>
-                                        <th>email</th>
-                                        
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                {% for customer in customers %}
-                                    <tr>
-                                        <td>{{ customer.username }}</td>
-                                        <td>{{ customer.email }}</td>
-                                        
-                                    </tr>
-                                {% endfor %}
-                                    <!-- Add more rows as needed -->
-                                </tbody>
-                            </table>
-                            
-                        
-                        
-                    </div>
-                </div>
+            <div class="col-lg-4">
+                <canvas id="myChart1"></canvas>
+            </div>
+            <div class="col-lg-4">
+                <canvas id="mychart2" ></canvas>
+
             </div>
         </div>
         <div class="row gt-3 mt-3">
@@ -266,9 +236,11 @@
                             {% endfor %}
                             </tbody>
                         </table>
+                       
                     </div>
                 </div>
             </div>
+            
         
             <!-- Top Categories Section -->
             <div class="col-lg-6">
@@ -300,7 +272,120 @@
         </div>
         
     </div>
+    
+    <script>
+        // Function to create a gradient for bar charts
+        function createGradient(ctx, colorStart, colorEnd) {
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, colorStart);
+            gradient.addColorStop(1, colorEnd);
+            return gradient;
+        }
+    
+        // Common chart options with custom CSS styling for all charts
+        function createCustomChart(ctx, type, labels, data, labelText, gradientStart, gradientEnd) {
+            const gradient = createGradient(ctx, gradientStart, gradientEnd);
+    
+            return new Chart(ctx, {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: labelText,
+                        data: data,
+                        backgroundColor: gradient, 
+                        borderColor: gradientStart,
+                        borderWidth: 2,
+                        borderRadius: 12, // Rounded bars
+                        fill: true,
+                        tension: 0.4, // Smooth lines for line charts
+                        pointBackgroundColor: gradientStart, // Line chart points color
+                        hoverBackgroundColor: 'rgba(255, 255, 255, 0.8)', // Hover effect
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            backgroundColor: '#fff',  // Light background for tooltips
+                            titleColor: '#333', // Dark title
+                            bodyColor: '#333',  // Dark tooltip body text
+                            padding: 12,
+                            borderColor: '#ddd', // Border for tooltip
+                            borderWidth: 1,
+                        },
+                        legend: {
+                            display: false // Hide legend for simplicity
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false // Hide gridlines on X-axis
+                            },
+                            ticks: {
+                                color: '#555' // X-axis labels color
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)' // Subtle gridlines
+                            },
+                            ticks: {
+                                color: '#555', // Y-axis labels color
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    
+        // Daily sales bar chart
+        const dailySalesCtx = document.getElementById('myChart').getContext('2d');
+        createCustomChart(
+            dailySalesCtx,
+            'bar', // Chart type
+            [{% for sale in daily_sales %} '{{sale.day}}', {% endfor %}], // Labels
+            [{% for sale in daily_sales %} {{sale.totalSales}}, {% endfor %}], // Data
+            'Daily Sales', // Label text
+            'rgba(75, 192, 192, 1)', // Gradient start color (greenish)
+            'rgba(153, 102, 255, 0.6)' // Gradient end color (light purple)
+        );
+    
+        // Monthly sales line chart
+        const monthlySalesCtx = document.getElementById('myChart1').getContext('2d');
+        createCustomChart(
+            monthlySalesCtx,
+            'line', // Chart type
+            [{% for sale in monthly_sale %} '{{sale.month}}', {% endfor %}],
+            [{% for sale in monthly_sale %} {{sale.total_sales}}, {% endfor %}],
+            'Monthly Sales',
+            'rgba(255, 99, 132, 1)', // Gradient start color (red)
+            'rgba(255, 159, 64, 0.6)' // Gradient end color (orange)
+        );
+    
+        // Yearly sales bar chart
+        const yearlySalesCtx = document.getElementById('mychart2').getContext('2d');
+        createCustomChart(
+            yearlySalesCtx,
+            'bar', // Chart type
+            [{% for sale in yearly_sales %} '{{sale.year}}', {% endfor %}],
+            [{% for sale in yearly_sales %} {{sale.totalSales}}, {% endfor %}],
+            'Yearly Sales',
+            'rgba(54, 162, 235, 1)', // Gradient start color (blue)
+            'rgba(75, 192, 192, 0.6)' // Gradient end color (green)
+        );
+    </script>
+    
+      
+    
+
 </body>
 <!-- <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"> -->
+
+
 
 {% endblock %}

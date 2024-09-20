@@ -40,7 +40,7 @@
                     {% else %}
                         <a href="{% url 'softdelete-product' product.id %}" class="btn btn-outline-dark btn-sm"> Soft delete</a>
                     {% endif %}
-                    <a href="#" class="btn btn-outline-danger btn-sm"  data-toggle="modal" data-target="#deleteModal" data-url="{% url 'delete-product' product.pk %}">Delete</a>
+                    <!-- <a href="#" class="btn btn-outline-danger btn-sm"  data-toggle="modal" data-target="#deleteModal" data-url="{% url 'delete-product' product.pk %}">Delete</a> -->
                 </td>
             </tr>
             {% endfor %}

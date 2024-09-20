@@ -6,14 +6,14 @@ from Customers.models import Cart,Cart_items
 from Customers.views import Checkout,user_profile
 from authentication.views import user_login
 from django.utils import timezone
-from .models import Order,Order_item,Order_cancellation
+from .models import Order,Order_item,Order_cancellation,return_reason
 from adminn.models import Coupon
 from decimal import Decimal
 from django.views.decorators.csrf import csrf_exempt
 import razorpay
 from django.conf import settings
 from django.http import HttpResponseBadRequest,JsonResponse
-from orders.forms import OrderCancellationForm
+from orders.forms import OrderCancellationForm,ReturnreasonForm
 from django.contrib import messages
 
 from django.http import HttpResponse
@@ -21,6 +21,8 @@ from django.template.loader import get_template
 from xhtml2pdf import pisa
 
 from Product.models import ProductOffer,Category_offer
+
+from Product.models import Product
 
 
 
@@ -47,7 +49,7 @@ def Order_success(request):
         
         try:
             cart = Cart.objects.get(customer_id=user.id)
-            cart_items = Cart_items.objects.filter(cart=cart)
+            cart_items = Cart_items.objects.filter(cart=cart,product__soft_delete=False,product__category__soft_delete=False)
         except Cart.DoesNotExist:
             return HttpResponse("Error: Cart not found")
 
@@ -102,21 +104,35 @@ def Order_success(request):
                 return redirect(Checkout)
             
             total_price += item.quantity * product_price
-            order_items.append((product, item.quantity, product.price))
+            order_items.append({
+                'product_id': product.id,
+                'quantity': item.quantity,
+                'price': float(product_price) 
+                })
             print(total_price)
+
         # total_price=sum( total_price for item in cart_items)
         print(total_price)
 
+        print(order_items)
 
 
+        coupon_discount = Decimal('0.00')
         if coupon and not remove_coupon:
+            print(coupon)
             
             try:
                 coupon = Coupon.objects.get(coupon_code=coupon, is_active=True)
                 
                 if total_price >= coupon.min_purchase_amount:
+                    coupon_discount = float(coupon.discount)
                     
-                    total_price -= float(coupon.discount)
+                    total_price -= Decimal(coupon_discount)
+
+                    request.session['coupon'] = coupon.coupon_code
+                    
+                   
+                    
                     
                 else:
                     return HttpResponse("Error: Minimum purchase amount for the coupon is not met")
@@ -128,7 +144,8 @@ def Order_success(request):
             coupon = None
             messages.success(request,"coupon removed successfully")
             return redirect(Checkout)
-
+        
+        
         # if payment == 'cod':
         #     if total_price < 1000:
         #         print('cod above 1000')
@@ -138,6 +155,7 @@ def Order_success(request):
         if payment =='wallet':
             
             wallet = get_object_or_404(Wallet,user=user)
+            print(wallet)
             transaction = Transaction.objects.filter(wallet=wallet)
             if wallet.amount>total_price:
                 wallet.amount -=Decimal(total_price)
@@ -158,23 +176,32 @@ def Order_success(request):
 
 
                 )
-                for product, quantity, price in order_items:
+                for item in order_items:
+                    product = get_object_or_404(Product,id = item['product_id'])
                     Order_item.objects.create(
                         order=order,
                         Product=product,
-                        quantity=quantity,
-                        price=price
+                        quantity=item['quantity'],
+                        price=item['price']
                     )
 
-                    product.stock -= quantity
+                    product.stock -= item['quantity']
                     product.save()
                 cart_items.delete()
+                Transaction.objects.create(wallet = wallet,amount = order.total_price,transaction_type = 'debit')
 
                 return render(request, 'order-success.html')
             else:
                 return redirect(Checkout)
             
 
+        if payment == 'razorpay':
+            print("haii")
+            request.session['total_price'] = str(total_price)
+            request.session['order_items'] = order_items 
+            request.session['address_id'] = select_address_id  
+            # request.session['coupon'] = coupon if coupon else None 
+            return redirect(paymenthomepage)
         
         order = Order.objects.create(
             user=user,
@@ -193,23 +220,20 @@ def Order_success(request):
        
     
     
-        for product, quantity, price in order_items:
+        for item in order_items:
+            product = get_object_or_404(Product,id = item['product_id'])
             Order_item.objects.create(
                 order=order,
                 Product=product,
-                quantity=quantity,
-                price=price
+                quantity=item['quantity'],
+                price=item['price']
             )
 
-            product.stock -= quantity
+            product.stock -= item['quantity']
             product.save()
         cart_items.delete()
         
-        if payment == 'razorpay':
-            print("haii")
-            request.session['total_price'] = str(total_price)
-            request.session['order_id'] = order.id
-            return redirect(paymenthomepage)
+        
         # if payment == 'wallet':
         #     wallet = get_object_or_404(Wallet,user = user)
         #     transaction = Transaction.objects.filter(wallet = wallet)
@@ -251,8 +275,8 @@ def ordercancel(request,pk):
             if form.is_valid():
                 print(' inside reason form ')
 
-                
-                
+                order.status = 'cancel requested'
+                order.save()
                 Order_cancellation.objects.create(
                     order=order,
                     reason=form.cleaned_data['reason'],
@@ -279,10 +303,28 @@ def returnrequest(request,pk):
         
         order=Order.objects.get(id=pk)
         
-        order.is_return=True
-        order.return_status = 'Return requested'
-        order.save()
+        
         print('return')
+        if request.method == 'POST':
+            print('reason post')
+            form = ReturnreasonForm(request.POST)
+
+            if form.is_valid():
+                print(' inside reason form ')
+
+                order.is_return=True
+                order.return_status = 'Return requested'
+                order.save()
+                return_reason.objects.create(
+                    order=order,
+                    return_reason=form.cleaned_data['reason'],
+                   
+                )
+
+                return redirect(user_profile,pk = user.id)
+        else:
+            form = ReturnreasonForm()
+            return render(request, 'return_reason.html', {'order': order,'form': form})
         return redirect(user_profile,pk = user.id)
     return redirect(user_login)
 
@@ -346,11 +388,57 @@ def paymenthandler(request):
                         # capture the payemt
                         razorpay_client.payment.capture(payment_id, amount)
                         
-                        order_id=request.session.get('order_id')
-                        print("ordeeeeerrrid",order_id)
-                        order=Order.objects.get(id=order_id)
-                        order.payment_status='Paid'
-                        order.save()
+                        user = get_object_or_404(User, username=request.session['user'])
+                        cart = Cart.objects.get(customer_id=user.id)
+                        cart_items = Cart_items.objects.filter(cart=cart)
+                        address = User_address.objects.get(id=request.session['address_id'])
+                        order_items = request.session.get('order_items',[])
+                        coupon_code = request.session.get('coupon', None)
+                        coupon = None
+                        if coupon_code:
+                            try:
+                                coupon = Coupon.objects.get(coupon_code=coupon_code, is_active=True)
+                            except Coupon.DoesNotExist:
+                                coupon = None
+                        print('order not created')
+
+                        order = Order.objects.create(
+                            user=user,
+                            created_at=timezone.now(),
+                            total_price=total_price,
+                            status='Pending',
+                            street_address=address.street,
+                            city=address.city,
+                            district=address.district,
+                            state=address.state,
+                            pincode=address.pincode,
+                            payment='razorpay',
+                            payment_status='Paid',
+                            coupon=coupon
+                        )
+                        print('order created order items not')
+                        for item in order_items:
+                            product = get_object_or_404(Product,id = item['product_id'])
+                            Order_item.objects.create(
+                                order=order,
+                                Product=product,
+                                quantity=item['quantity'],
+                                price=item['price']
+                            )
+
+                            product.stock -= item['quantity']
+                            product.save()
+                        cart_items.delete()
+                        
+                        print('order and order items created')
+                            
+                        del request.session['total_price']
+                        del request.session['order_items']
+                        del request.session['address_id']
+                        # del request.session['coupon']
+
+
+                        
                         
                         session_data = []
                         for key, value in request.session.items():
@@ -360,18 +448,18 @@ def paymenthandler(request):
                         
                         print(session_details)
                         
-                        del request.session['total_price']
-                        del request.session['order_id']
+                        
 
                         return render(request, 'order-success.html')
-                    except:
-                        
+                    except Exception as e:
+                        print(e)
                         print("payment failed")
                         # if there is an error while capturing payment.
                         return render(request, 'paymentfail.html')
                 else:
                     print("failed")
-                    return render(request, 'paymentfail.html')
+                    messages.error(request,"Payment vaerification failed.please try again")
+                    return redirect(Checkout)
             except:
                 return HttpResponseBadRequest()
         else:
@@ -382,7 +470,7 @@ def paymenthandler(request):
 
 def order_pdf_view(request,pk):
 
-    print('pdf')
+    # print('pdf')
 
     if 'user' in request.session:
         username = request.session['user']
@@ -409,61 +497,3 @@ def order_pdf_view(request,pk):
         return response
     return redirect(user_login)
 
-
-
-# def remove_coupon(request):
-#     if 'user' not in request.session:
-#         return redirect('user_login') 
-
-#     user = request.user
-#     if request.method == 'POST':
-#         order_id = request.session.get('order_id')
-#         print (order_id)
-#         try:
-#             order = Order.objects.get(id=order_id, user=user)
-#         except Order.DoesNotExist:
-#             return JsonResponse({'status': 'error', 'message': 'Order not found.'})
-
-#         # Remove the coupon from the order
-#         if order.coupon:
-#             order.coupon = None  
-#             order.save()
-
-           
-#             cart_items = Cart_items.objects.filter(cart__customer_id=user.id)
-#             total_price = 0
-
-#             for item in cart_items:
-#                 product = item.product
-#                 # Apply the offers logic here, just like in the Order_success function
-#                 category_offer = Category_offer.objects.filter(category=item.product.category,
-#                                                                start_date__lte=timezone.now(),
-#                                                                end_date__gte=timezone.now()).first()
-#                 product_offer = ProductOffer.objects.filter(product=item.product,
-#                                                             start_date__lte=timezone.now(),
-#                                                             end_date__gte=timezone.now()).first()
-
-#                 if category_offer:
-#                     category_product_price = Decimal(item.product.price) - (
-#                             Decimal(item.product.price) * category_offer.discount_percentage / Decimal('100'))
-
-#                 if product_offer:
-#                     product_product_price = Decimal(item.product.price) - Decimal(product_offer.discount_price)
-
-#                 if category_offer and product_offer:
-#                     product_price = min(category_product_price, product_product_price)
-#                 elif category_offer:
-#                     product_price = category_product_price
-#                 elif product_offer:
-#                     product_price = product_product_price
-#                 else:
-#                     product_price = item.product.price
-
-#                 total_price += item.quantity * product_price
-
-#             # Return updated total price
-#             return JsonResponse({'status': 'success', 'new_total_price': total_price})
-#         else:
-#             return JsonResponse({'status': 'error', 'message': 'No coupon to remove.'})
-
-#     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})

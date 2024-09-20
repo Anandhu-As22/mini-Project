@@ -1,0 +1,52 @@
+{% extends "admin-sidebar.html" %}
+
+{% block content %}
+    <div class="container mt-5" style="max-width: 600px; margin: 0 auto; padding: 30px; background-color: #f9f9f9; border-radius: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);">
+        <h1 style="text-align: center; font-size: 28px; font-family: 'Arial', sans-serif; color: #333; margin-bottom: 20px;">Generate Sales Report</h1>
+
+        <form method="post" action="{% url 'sales-report' %}" style="display: flex; flex-direction: column; gap: 15px;">
+            {% csrf_token %}
+            
+            <div class="form-group" style="display: flex; flex-direction: column;">
+                <label for="period" style="font-size: 16px; color: #555; margin-bottom: 5px;">Select Report Period:</label>
+                <select id="period" name="period" required style="padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; background-color: #fff;">
+                    <option value="" disabled selected>-- Select Period --</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="custom">Custom</option>
+                </select>
+            </div>
+
+            <!-- Custom date fields, hidden by default -->
+            <div id="custom-dates" style="display: none; flex-direction: column; gap: 10px;">
+                <div class="form-group" style="display: flex; flex-direction: column;">
+                    <label for="start_date" style="font-size: 16px; color: #555; margin-bottom: 5px;">Start Date:</label>
+                    <input type="date" id="start_date" name="start_date" style="padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; background-color: #fff;">
+                </div>
+                <div class="form-group" style="display: flex; flex-direction: column;">
+                    <label for="end_date" style="font-size: 16px; color: #555; margin-bottom: 5px;">End Date:</label>
+                    <input type="date" id="end_date" name="end_date" style="padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; background-color: #fff;">
+                </div>
+            </div>
+
+            <button type="submit" class="btn" style="padding: 10px 15px; font-size: 18px; background-color: #007BFF; color: white; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s;">
+                Generate Report
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // Show custom date input fields if "Custom" is selected
+        const periodSelect = document.getElementById('period');
+        const customDates = document.getElementById('custom-dates');
+
+        periodSelect.addEventListener('change', function () {
+            if (this.value === 'custom') {
+                customDates.style.display = 'flex';
+            } else {
+                customDates.style.display = 'none';
+            }
+        });
+    </script>
+{% endblock %}

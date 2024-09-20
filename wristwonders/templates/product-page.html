@@ -233,38 +233,52 @@
 
 <script>
     $(document).ready(function() {
-        $('.wishlist-btn').on('click', function() {
-            var button = $(this);
-            var productId = button.data('product-id');
-            var isRemoving = button.find('.remove-wishlist').length > 0;
-            var url = isRemoving ? '{% url "remove-wishlist" 0 %}'.replace('0', productId) : '{% url "add-wishlist" 0 %}'.replace('0', productId);
+    $('.wishlist-btn').on('click', function() {
+        var button = $(this); // The clicked button
+        var productId = button.data('product-id'); // Get the product ID from data attribute
+        var isInWishlist = button.find('.remove-wishlist').length > 0; // Check if the product is already in the wishlist
+        var url = isInWishlist ? '{% url "remove-wishlist" 0 %}'.replace('0', productId) : '{% url "add-wishlist" 0 %}'.replace('0', productId); // URL for add or remove action
 
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: {
-                    'csrfmiddlewaretoken': '{{ csrf_token }}'
-                },
-                success: function(response) {
-                    if (response.status === 'success') {
-                        // Toggle button visibility
-                        button.find('.remove-wishlist, .add-wishlist').toggle();
-
-                        // Optionally update the button's styles
-                        if (isRemoving) {
-                            button.find('.add-wishlist').css('background-color', '#ccc');
-                        } else {
-                            button.find('.remove-wishlist').css('background-color', '#ff6f61');
-                        }
-
-                        alert(response.message);
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: {
+                'csrfmiddlewaretoken': '{{ csrf_token }}' // Ensure CSRF token is included in the request
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    // Toggle between "Add to Wishlist" and "Remove from Wishlist"
+                    if (isInWishlist) {
+                        // If in wishlist, change to "Add to Wishlist"
+                        button.find('.remove-wishlist').remove(); // Remove the 'remove' button
+                        button.append(`
+                            <div class="add-wishlist" style="background-color: #ccc;">
+                                <i class="fas fa-heart mr-2" style="font-size: 20px;"></i>
+                                <span>Add to Wishlist</span>
+                            </div>
+                        `);
                     } else {
-                        alert(response.message);
+                        // If not in wishlist, change to "Remove from Wishlist"
+                        button.find('.add-wishlist').remove(); // Remove the 'add' button
+                        button.append(`
+                            <div class="remove-wishlist" style="background-color: #ff6f61;">
+                                <i class="fas fa-heart mr-2" style="font-size: 20px;"></i>
+                                <span>Remove from Wishlist</span>
+                            </div>
+                        `);
                     }
+
+                    // Optionally, display a message
+                    alert(response.message);
+                } else {
+                    alert(response.message); // Display error message if something goes wrong
                 }
-            });
+            }
         });
     });
+});
+
+
 </script>
 <!-- <style>
     .wishlist-btn.in-wishlist {
@@ -275,6 +289,16 @@
         background-color: #ccc; /* Grey color for not-in-wishlist */
     }
     </style> -->
+<style>
+    .product-img img {
+        width: 100%;
+        transition: transform 0.3s ease-in-out; /* Smooth zoom */
+    }
+    
+    .product-img:hover img {
+        transform: scale(2.5); /* Zoom in the image */
+    }
+</style>
 
     {% endblock %}
 

@@ -62,6 +62,7 @@
                         <th>Reason</th>
                         <th>Cancelled At</th>
                         <th>Status</th>
+                        <td>details</td>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -74,6 +75,9 @@
                             <td>{{ cancellation.cancelled_at }}</td>
                             <td>
                                 <span class="badge badge-warning">{{ cancellation.cancel_status }}</span>
+                            </td>
+                            <td>
+                                <a href="{% url 'adminnorderdetail' cancellation.order.id %}" class="btn btn-primary btn-sm">View Details</a>
                             </td>
                             <td>
                                 <form action="{% url 'approve-cancellations' cancellation.id %}" method="post" style="display:inline-block;">

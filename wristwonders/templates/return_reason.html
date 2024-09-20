@@ -1,0 +1,21 @@
+{% extends 'nav.html' %}
+{% block type %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5" style="max-width: 600px;">
+    <h2 class="mb-4 text-center" style="font-family: 'Arial', sans-serif; color: #333;">
+        Return Order #{{ order.id }}
+    </h2>
+    <div class="card shadow-sm p-4" style="border-radius: 10px;">
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                {{ form.reason.label_tag }}
+                {{ form.reason }}
+            </div>
+            <button type="submit" class="btn btn-danger btn-block">Return Order</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

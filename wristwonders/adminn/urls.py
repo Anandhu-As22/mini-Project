@@ -32,7 +32,10 @@ urlpatterns =[
 
     path('order_cancellations/',views.manage_cancellations,name="manage-cancellations"),
     path('cancel-approved/<pk>',views.approve_cancellations,name="approve-cancellations"),
-    path('reject-cancellation/<pk>',views.reject_cancellation,name="reject-cancellation")
+    path('reject-cancellation/<pk>',views.reject_cancellation,name="reject-cancellation"),
+
+    path('sales/',views.sales_report,name="sales-report"),
+    path('download-sales-report-pdf/<int:pk>/', views.download_sales_report_pdf, name='download_sales_report_pdf'),
 
     
 

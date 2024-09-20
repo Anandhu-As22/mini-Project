@@ -1,0 +1,108 @@
+{% extends "admin-sidebar.html" %}
+
+{% block content %}
+    <div class="container" style="max-width: 800px; margin: 20px auto; font-family: Arial, sans-serif;">
+        <h1 style="text-align: center; color: #2c3e50;">Sales Report</h1>
+
+        {% if total_sales_delivered  %}
+        <div>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                <thead>
+                    <tr style="background-color: #2c3e50; color: white;">
+                        <th style="padding: 10px; text-align: left;">Order ID</th>
+                        <th style="padding: 10px; text-align: left;">User</th>
+                        <th style="padding: 10px; text-align: left;">Total Price</th>
+                        <th style="padding: 10px; text-align: left;">Product</th>
+                        <th style="padding: 10px; text-align: left;">Quantity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in delivered_orders %}
+                    <!-- Order details -->
+                    <tr>
+                        <td>{{ order.id }}</td>
+                        <td>{{ order.user.username }}</td>
+                        <td>${{ order.total_price }}</td>
+                        <td></td> <!-- Leave this blank as products will be listed below -->
+                        <td></td> <!-- Leave this blank as quantities will be listed below -->
+                    </tr>
+                    <!-- Iterate over the order items for the current order -->
+                    {% for item in order.order_item_set.all %}
+                    <tr>
+                        <td></td> <!-- Empty cell for order ID -->
+                        <td></td> <!-- Empty cell for user -->
+                        <td></td> <!-- Empty cell for total price -->
+                        <td>{{ item.Product.Product_name }}</td>
+                        <td>{{ item.quantity }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+
+
+
+
+
+
+
+            <div class="report" style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+                <h2 style="color: #34495e; font-size: 20px;">Report for period: {{ start_date|date:"F j, Y" }} to {{ end_date|date:"F j, Y" }}</h2>
+
+                <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                    <tr style="background-color: #2c3e50; color: white;">
+                        <th style="padding: 10px; text-align: left;">Total Sales Delivered</th>
+                        <td style="padding: 10px; text-align: right;">${{ total_sales_delivered }}</td>
+                    </tr>
+                    <tr style="background-color: #ecf0f1;">
+                        <th style="padding: 10px; text-align: left;">Number of Orders Delivered</th>
+                        <td style="padding: 10px; text-align: right;">{{ delivery_order_count }}</td>
+                    </tr>
+                    <tr style="background-color: #2c3e50; color: white;">
+                        <th style="padding: 10px; text-align: left;">Total Coupon Discount</th>
+                        <td style="padding: 10px; text-align: right;">${{ coupon_discount }}</td>
+                    </tr>
+                    <tr style="background-color: #ecf0f1;">
+                        <th style="padding: 10px; text-align: left;">Total actual product price</th>
+                        <td style="padding: 10px; text-align: right;">${{ total_actual_price_of_product }}</td>
+                    </tr>
+                    <tr style="background-color: #2c3e50; color: white;">
+                        <th style="padding: 10px; text-align: left;">Total offer discount</th>
+                        <td style="padding: 10px; text-align: right;">${{ total_offer_discount }}</td>
+                    </tr>
+                </table>
+                
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="{% url 'download_sales_report_pdf' report.id %}" class="btn btn-primary">Download PDF</a>
+            </div>
+        {% else %}
+            <p style="text-align: center; color: #e74c3c; font-size: 18px;">No sales data available for the selected period.</p>
+        {% endif %}
+
+        <div id="custom-dates" style="display: none; margin-top: 20px; padding: 10px; background-color: #f4f4f4; border: 1px solid #dcdcdc; border-radius: 5px;">
+            <label for="start-date" style="display: block; margin-bottom: 5px;">Start Date:</label>
+            <input type="date" id="start-date" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 10px;">
+            
+            <label for="end-date" style="display: block; margin-bottom: 5px;">End Date:</label>
+            <input type="date" id="end-date" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+
+        <script>
+            // Show custom date input fields if "Custom" is selected
+            const periodSelect = document.getElementById('period');
+            const customDates = document.getElementById('custom-dates');
+
+            periodSelect.addEventListener('change', function () {
+                if (this.value === 'custom') {
+                    customDates.style.display = 'block';
+                } else {
+                    customDates.style.display = 'none';
+                }
+            });
+        </script>
+    </div>
+{% endblock %}

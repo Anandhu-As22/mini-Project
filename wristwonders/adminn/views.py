@@ -5,7 +5,7 @@ from authentication.forms import RegisterForm
 from .forms import UpdateForm,AddCouponForm,EditCouponForm,ProductOfferForm,CategoryOfferForm,EditCategoryOfferForm,EditProductOffersForm
 from orders.models import Order,Order_item,Order_cancellation
 from django.http import JsonResponse
-from .models import Coupon
+from .models import Coupon,SalesReport
 
 from django.views.decorators.csrf import csrf_exempt
 from Product.models import Category_offer,ProductOffer,Product,Category
@@ -17,36 +17,117 @@ from decimal import Decimal
 from django.core.paginator import Paginator
 
 from django.db.models import Sum,Count
+from django.utils import timezone
+from datetime import timedelta,datetime
+from django.db.models import Q
+from  django.db.models.functions import TruncDay,TruncMonth,TruncYear
 
-# Create your views here.
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from django.template.loader import render_to_string
+
+
+import io
+import calendar
+# Create your views here
 
 
 def admin_home(request):
     if request.user.is_authenticated:
         user =request.user
-        total_sale = Order.objects.filter(payment_status = 'Paid',is_cancelled = False).count()
-        total_amount = Order.objects.filter(payment_status = 'Paid',is_cancelled = False).aggregate(total_price=Sum('total_price'))
+
+        total_sale = Order.objects.filter(status='Delivered',is_cancelled = False).count()
+
+        total_amount = Order.objects.filter(status = 'Delivered',is_cancelled = False).aggregate(total_price=Sum('total_price'))
+
         total_price = total_amount['total_price']
         orders = Order.objects.order_by('-created_at')[:5]
         customers = User.objects.order_by('-date_joined')[:5]
+
+       
+
+
+        
        
 
         users = User.objects.count()
         # print(total_price)
         # print(total_sale)
-        # print(user.username )
+        # print(user.username)
 
-        top_products = Order_item.objects.values('Product').annotate(order_count = Count('id')).order_by('-order_count')[:10]
+        top_products = Order_item.objects.values('Product').annotate(order_count = Count('id')).filter(order__status='Delivered',order__is_cancelled=False).order_by('-order_count')[:10]
 
         top_products_with_details = [{ 'product' : Product.objects.get(id = item['Product']),'order_count':item['order_count']} for item in top_products]
 
-        top_category = Order_item.objects.values('Product__category').annotate(order_count = Count('id')).order_by('-order_count')[:10]
+        top_category = Order_item.objects.values('Product__category').annotate(order_count = Count('id')).filter(order__status ='Delivered',order__is_cancelled = False).order_by('-order_count')[:10]
 
         top_category_with_details = [{'category': Category.objects.get(id=item['Product__category']),'order_count': item['order_count']} for item in top_category]
 
         # print(top_products,'top')
         # print(top_category,'top category')
-        return render(request,'admin_home.html',{'total_sale' : total_sale,'total_price':total_price,'users' : users,'user':user,'orders':orders,'customers':customers,'top_products':top_products_with_details,'top_category':top_category_with_details  })
+
+        # period = request.GET.get('period')
+        # start_date = end_date = timezone.now()
+
+        # if period == 'daily':
+        #     start_date = timezone.now().replace(hour=00,minute=00,second=00)
+        # elif period == 'weekly':
+        #     start_date = timezone.now() - timedelta(days=timezone.now().weekday())
+        #     start_date = start_date.replace(hour=00,minute=00,second=00)
+        #     end_date = start_date + timedelta(days=6)
+        # elif period == 'monthly':
+        #     start_date = timezone.now().replace(day=1,hour=00,minute=00,second=00)
+        #     last_day_of_month = calendar.monthrange(start_date.year, start_date.month)[1]
+        #     end_date = start_date.replace(day=last_day_of_month, hour=23, minute=59, second=59, microsecond=999999)
+
+
+        # elif period == 'custom':
+        #     start_date_date = request.GET.get('start_date')
+        #     end_date_date = request.GET.get('end_date')
+
+        #     # Validate that both dates are provided
+        #     if not start_date_date or not end_date_date:
+        #         # You can handle the missing dates here
+        #         return render(request, 'sales.html', {'error': 'Please provide both start and end dates for the custom period.'})
+
+        #     # Parse the custom date inputs
+        #     start_date = datetime.strptime(start_date_date, '%Y-%m-%d').replace(hour=0, minute=0, second=0, microsecond=0)
+        #     end_date = datetime.strptime(end_date_date, '%Y-%m-%d').replace(hour=23, minute=59, second=59, microsecond=999999)
+
+
+        # delivered_orders = Order.objects.filter(created_at__range = [start_date,end_date],status ='Delivered' ).filter(Q(is_return = False)|Q(return_status = 'Rejected'))
+
+        # total_sales_delivered = delivered_orders.aggregate(total_sales = Sum('total_price'))['total_sales'] or ()
+
+        # delivery_order_count = delivered_orders.count()
+
+        today = timezone.now()
+
+        start_date = today-timedelta(days=7)
+
+        daily_sales = (Order.objects.filter(status='Delivered', created_at__gte=start_date)
+               .annotate(day=TruncDay('created_at'))
+               .values('day')
+               .annotate(totalSales=Sum('total_price'))
+               .order_by('day'))
+        # print(daily_sales)
+
+        monthly_sale = (Order.objects.filter(status='Delivered')
+                        .annotate(month=TruncMonth('created_at'))
+                        .values('month')
+                        .annotate(total_sales=Sum('total_price'))
+                        .order_by('month'))       
+        # print(monthly_sale)
+        yearly_sales = (Order.objects
+             .annotate(year=TruncYear('created_at'))
+             .values('year')
+             .annotate(totalSales=Sum('total_price'))
+             .order_by('year'))
+        print(yearly_sales)
+
+
+        return render(request,'admin_home.html',{'total_sale' : total_sale,'total_price':total_price,'users' : users,'user':user,'orders':orders,'customers':customers,'top_products':top_products_with_details,'top_category':top_category_with_details,'daily_sales':daily_sales,'monthly_sale':monthly_sale,'yearly_sales':yearly_sales })
     return redirect(admin_login)
 
 
@@ -107,6 +188,8 @@ def Un_block_user(request,pk):
 
 def orders_list(request):
     if 'adminn' in request.session:
+        search = request.GET.get('q', '')
+        print(search)
         if request.method == "POST":
             order_id = request.POST.get('order_id')
             new_status = request.POST.get('new_status')
@@ -114,12 +197,20 @@ def orders_list(request):
             print(new_status)
             try:
                 order = Order.objects.get(pk=order_id)
+                wallet = get_object_or_404(Wallet,user = order.user)
                 print(order.user)
                 if order.is_return:
                     order.return_status=new_status
                     if new_status == 'Returned':
-                        order.payment_status = 'cash refunded'
+                       
+
+                        wallet.amount += Decimal(order.total_price)
+                        wallet.save()
+                        Transaction.objects.create(wallet = wallet,amount = order.total_price,transaction_type = 'credit')
+
+                        order.payment_status = 'cash refunded to your wallet'
                         order.save()
+
                     order.save()
                 
                 if new_status == 'Delivered':
@@ -139,7 +230,15 @@ def orders_list(request):
                 return JsonResponse({'success': True})
             except Order.DoesNotExist:
                 return JsonResponse({'success': False, 'error': 'Order does not exist'})
+            
+        
         orders = Order.objects.all().order_by('-created_at')
+        if search:
+            orders = orders.filter(
+                Q(id__icontains=search) | 
+                Q(user__username__icontains=search) |  
+                Q(status__icontains=search)  
+            )
         paginator = Paginator(orders,15)
         page_number  = request.GET.get('page',1)
         orders = paginator.get_page(page_number)
@@ -243,6 +342,8 @@ def edit_coupon(request,pk):
                 discount=editcoupon_form.cleaned_data['discount']
                 min_purchase_amount=editcoupon_form.cleaned_data['min_purchase_amount']
 
+                
+
                 if len(couponcode)<6:               
                     editcoupon_form.add_error('coupon_code','it should be length more than 6')
                 
@@ -254,6 +355,11 @@ def edit_coupon(request,pk):
                 
                 if discount >= min_purchase_amount:
                     editcoupon_form.add_error('discount','discount amount should be lesser than min purchase amount')
+
+                if Coupon.objects.exclude(id = coupon.pk).filter(coupon_code=couponcode).exists():
+                    print("coupon exists")
+                    editcoupon_form.add_error('coupon_code','this coupon code already exists')
+                
                     
                 
                     
@@ -300,11 +406,13 @@ def apply_coupon(request):
                 coupon = Coupon.objects.get(coupon_code=coupon_code, is_active=True)
                 if total_price >= coupon.min_purchase_amount:
                     new_total_price = total_price - coupon.discount
-                    return JsonResponse({
+                    response_data = {
                         'status': 'success',
-                        
-                        'new_total_price': float(new_total_price)  
-                    })
+                        'coupon_code': coupon.coupon_code,
+                        'discount': coupon.discount,
+                        'new_total_price': new_total_price
+                        }
+                    return JsonResponse(response_data)
                 else:
                     return JsonResponse({
                         'status': 'error',
@@ -533,11 +641,166 @@ def approve_cancellations(request,pk):
 
 def reject_cancellation(request,pk):
     if 'adminn' in request.session:
+        print('reject')
         cancellation = get_object_or_404(Order_cancellation,id = pk)
-        cancellation.status = 'rejected'
+        cancellation.cancel_status = 'rejected'
         cancellation.save()
+        print(cancellation.cancel_status)
+        
         order = cancellation.order
         order.is_cancelled = False
+        order.status = 'cancel rejected'
         order.save()
+        print(order.is_cancelled)
         return redirect(manage_cancellations)
+    return redirect(admin_login)
+
+
+def sales_report(request):
+    if 'adminn' in request.session:
+        if request.method == 'POST':
+            period = request.POST.get('period')
+
+            start_date = end_date = timezone.now()
+
+            if period == 'daily':
+                start_date = timezone.now().replace(hour=00,minute=00,second=00)
+            elif period == 'weekly':
+                start_date = timezone.now() - timedelta(days=timezone.now().weekday())
+                start_date = start_date.replace(hour=00,minute=00,second=00)
+                end_date = start_date + timedelta(days=6)
+            elif period == 'monthly':
+                start_date = timezone.now().replace(day=1,hour=00,minute=00,second=00)
+                last_day_of_month = calendar.monthrange(start_date.year, start_date.month)[1]
+                end_date = start_date.replace(day=last_day_of_month, hour=23, minute=59, second=59, microsecond=999999)
+
+
+            elif period == 'custom':
+                start_date_date = request.POST.get('start_date')
+                end_date_date = request.POST.get('end_date')
+
+                # Validate that both dates are provided
+                if not start_date_date or not end_date_date:
+                    # You can handle the missing dates here
+                    return render(request, 'sales.html', {'error': 'Please provide both start and end dates for the custom period.'})
+
+                # Parse the custom date inputs
+                start_date = datetime.strptime(start_date_date, '%Y-%m-%d').replace(hour=0, minute=0, second=0, microsecond=0)
+                end_date = datetime.strptime(end_date_date, '%Y-%m-%d').replace(hour=23, minute=59, second=59, microsecond=999999)
+
+
+            delivered_orders = Order.objects.filter(created_at__range = [start_date,end_date],status ='Delivered' ).filter(Q(is_return = False)|Q(return_status = 'Rejected'))
+
+            total_sales_delivered = delivered_orders.aggregate(total_sales = Sum('total_price'))['total_sales'] or ()
+
+            delivery_order_count = delivered_orders.count()
+
+            coupon_discount = delivered_orders.filter(coupon__isnull=False).aggregate(total_discount = Sum('coupon__discount'))['total_discount'] or ()
+
+            total_actual_price = 0
+            product_details = []
+
+            for order in delivered_orders:
+                order_items = order.order_item_set.all()
+
+                for item in order_items:
+                    actual_price = item.Product.price
+                    item_total_price = actual_price * item.quantity
+                    total_actual_price += item_total_price
+
+
+                    product_details.append({
+                        'order_id': order.id,
+                        'product_name': item.Product.Product_name,
+                        'quantity': item.quantity,
+                        'actual_price': float(actual_price),
+                        'total_price': float(item_total_price)
+                    })
+
+            total_discount = total_actual_price - float(total_sales_delivered)
+
+            total_offer_discount = total_discount - float(coupon_discount) 
+            # print(total_offer_discount)
+            report = SalesReport.objects.create(
+                admin_user=request.user,
+                start_date=start_date,
+                end_date=end_date,
+                total_sales_delivered=total_sales_delivered,
+                delivery_order_count=delivery_order_count,
+                coupon_discount=coupon_discount,
+                total_actual_price=total_actual_price,
+                total_offer_discount=total_offer_discount
+            )
+            
+
+            context = { 
+                'delivered_orders':delivered_orders,
+                'total_sales_delivered': total_sales_delivered,
+                'delivery_order_count': delivery_order_count,
+                'coupon_discount': coupon_discount,
+                'start_date': start_date,
+                'end_date': end_date,
+                'total_actual_price_of_product': total_actual_price,
+                'total_offer_discount': total_offer_discount,
+                'report': report
+            }
+            print(report.id)
+
+            
+            return render(request,'sales_report.html',context)      
+        return render(request,'sales.html')
+    return redirect(admin_login)
+
+
+
+def render_to_pdf(template_src, context_dict):
+    
+    template = render_to_string(template_src, context_dict)
+    result = io.BytesIO()
+    pdf = pisa.pisaDocument(io.BytesIO(template.encode("UTF-8")), result)
+    if not pdf.err:
+        return HttpResponse(result.getvalue(), content_type='application/pdf')
+    return None
+
+def download_sales_report_pdf(request,pk):
+    print('haii')
+    if 'adminn' in request.session:
+        
+        
+        try:
+            print('try')
+            print(pk)
+            report = SalesReport.objects.get(pk=pk, admin_user=request.user)
+            print(report)
+        except SalesReport.DoesNotExist:
+            return HttpResponse("Error: Sales report not found", status=400)
+
+       
+
+        # Parse the stored data
+        start_date = report.start_date
+        end_date = report.end_date
+
+        delivered_orders = Order.objects.filter(created_at__range = [start_date,end_date],status ='Delivered' ).filter(Q(is_return = False)|Q(return_status = 'Rejected'))
+        context = {
+            'delivered_orders': delivered_orders,  # Fetch or leave empty if not needed
+            'total_sales_delivered': report.total_sales_delivered,
+            'delivery_order_count': report.delivery_order_count,
+            'coupon_discount': report.coupon_discount,
+            'start_date': report.start_date,
+            'end_date': report.end_date,
+            'total_actual_price_of_product': report.total_actual_price,
+            'total_offer_discount': report.total_offer_discount
+        }
+        print('cotext done')
+
+        # Generate and return the PDF
+        
+        pdf = render_to_pdf('salesreportpdf.html', context)
+        print(pdf)
+        if pdf:
+            response = HttpResponse(pdf, content_type='application/pdf')
+            response['Content-Disposition'] = 'attachment; filename="sales_report.pdf"'
+            return response
+        return HttpResponse("Error generating PDF", status=500)
     return redirect(admin_login)

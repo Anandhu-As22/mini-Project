@@ -3,6 +3,10 @@ from django.contrib.auth.models import AbstractUser
 from Product.models import Product
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
+from decimal import Decimal
+from django.utils import timezone
+from Product.models import ProductOffer,Category_offer
+
 # Create your models here.
 
 class User(AbstractUser):
@@ -42,7 +46,40 @@ class Cart_items(models.Model):
     quantity = models.PositiveIntegerField(default=1)
 
     def get_total(self):
-        return self.quantity * self.product.price
+        product_price = Decimal(self.product.price)  # Base price of the product
+
+        # Check for category offer
+        category_offer = Category_offer.objects.filter(
+            category=self.product.category,
+            start_date__lte=timezone.now(),
+            end_date__gte=timezone.now()
+        ).first()
+
+        # Check for product offer
+        product_offer = ProductOffer.objects.filter(
+            product=self.product,
+            start_date__lte=timezone.now(),
+            end_date__gte=timezone.now()
+        ).first()
+
+        # Apply category and product offers
+        if category_offer:
+            category_product_price = product_price - (product_price * category_offer.discount_percentage / Decimal('100'))
+
+        if product_offer:
+            product_product_price = product_price - Decimal(product_offer.discount_price)
+
+        # Determine the best price between category and product offer
+        if category_offer and product_offer:
+            product_price = min(category_product_price, product_product_price)
+        elif category_offer:
+            product_price = category_product_price
+        elif product_offer:
+            product_price = product_product_price
+
+        # Return total price for the cart item
+        return self.quantity * product_price
+       
     
 
 class Wishlist(models.Model):
