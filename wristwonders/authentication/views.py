@@ -55,6 +55,7 @@ def user_signup(request):
             user = form.save(commit=False)
             user.is_active = False
             print(user)
+            print(user.username)
 
             # generate otp
             otp = get_random_string(length=6,allowed_chars='0123456789')
@@ -71,7 +72,7 @@ def user_signup(request):
 
                 message = render_to_string('otp_verification_email.html',{'otp':otp,'username':user.username})
             except Exception as e:
-                print(e)
+                print(e)    
                 print('message error')
 
             from_email = 'asanandhu2001@gmail.com'
@@ -303,7 +304,7 @@ def forgot_password_verification(request):
 
 
 def user_logout(request):
-    
+    request.session.pop('user',None)
     logout(request)
    
     return redirect('post-logout')
@@ -346,6 +347,7 @@ def admin_login(request):
   
 @never_cache
 def adminn_logout(request):
+    request.session.pop('adminn',None)
     logout(request)
     return redirect(admin_login)
 

@@ -115,7 +115,11 @@ def Order_success(request):
         print(total_price)
 
         print(order_items)
-
+    
+       
+        if isinstance(total_price, float):
+            print('Total price is of type:', type(total_price))
+            total_price = Decimal(total_price)
 
         coupon_discount = Decimal('0.00')
         if coupon and not remove_coupon:
