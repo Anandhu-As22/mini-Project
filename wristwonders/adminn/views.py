@@ -716,7 +716,7 @@ def sales_report(request):
                         'actual_price': float(actual_price),
                         'total_price': float(item_total_price)
                     })
-
+            print(total_sales_delivered) 
             total_discount = total_actual_price - float(total_sales_delivered)
 
             total_offer_discount = total_discount - float(coupon_discount) 

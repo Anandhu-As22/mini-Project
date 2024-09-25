@@ -101,10 +101,10 @@ WSGI_APPLICATION = 'wristwonders.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'wrist',
-        'USER': 'postgres',
-        'PASSWORD': 'Anandhu08',
-        'HOST': 'localhost',
+        'NAME': 'wristwonders',
+        'USER': 'mysuperuser',
+        'PASSWORD': 'mysuperuser',
+        'HOST': 'wristwonders-db.cj64so4ga0ud.eu-north-1.rds.amazonaws.com',
         'PORT': '5432'
     }
 }
